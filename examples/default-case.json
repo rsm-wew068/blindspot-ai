@@ -1,0 +1,1441 @@
+{
+  "version": "blindspot-0.1",
+  "scenario": {
+    "speed_kmh": 45.0,
+    "van_gap": 3.0,
+    "emerge_s": 0.8,
+    "ped_speed": 1.8,
+    "reaction_s": 0.3,
+    "brake_mps2": 6.0,
+    "pedestrian": true
+  },
+  "results": {
+    "reactive": {
+      "id": "1300eba95b",
+      "version": "blindspot-0.1",
+      "scenario": {
+        "speed_kmh": 45.0,
+        "van_gap": 3.0,
+        "emerge_s": 0.8,
+        "ped_speed": 1.8,
+        "reaction_s": 0.3,
+        "brake_mps2": 6.0,
+        "pedestrian": true
+      },
+      "policy": "reactive",
+      "frames": [
+        {
+          "t": 0.0,
+          "x": 0.0,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.1,
+          "x": 1.25,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.2,
+          "x": 2.5,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.3,
+          "x": 3.75,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.4,
+          "x": 5.0,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.5,
+          "x": 6.25,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.6,
+          "x": 7.5,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.7,
+          "x": 8.75,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.8,
+          "x": 10.0,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.9,
+          "x": 11.25,
+          "v": 12.5,
+          "ped_y": 5.42,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.0,
+          "x": 12.5,
+          "v": 12.5,
+          "ped_y": 5.239999999999999,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.1,
+          "x": 13.75,
+          "v": 12.5,
+          "ped_y": 5.06,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.2,
+          "x": 15.0,
+          "v": 12.5,
+          "ped_y": 4.88,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.3,
+          "x": 16.25,
+          "v": 12.5,
+          "ped_y": 4.699999999999999,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.4,
+          "x": 17.5,
+          "v": 12.5,
+          "ped_y": 4.52,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.5,
+          "x": 18.75,
+          "v": 12.5,
+          "ped_y": 4.34,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.6,
+          "x": 20.0,
+          "v": 12.5,
+          "ped_y": 4.159999999999999,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.7,
+          "x": 21.25,
+          "v": 12.5,
+          "ped_y": 3.9799999999999995,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.8,
+          "x": 22.5,
+          "v": 12.5,
+          "ped_y": 3.8,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.9,
+          "x": 23.75,
+          "v": 12.5,
+          "ped_y": 3.62,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.0,
+          "x": 25.0,
+          "v": 12.5,
+          "ped_y": 3.4399999999999995,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.1,
+          "x": 26.25,
+          "v": 12.5,
+          "ped_y": 3.2599999999999993,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.2,
+          "x": 27.5,
+          "v": 12.5,
+          "ped_y": 3.079999999999999,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.3,
+          "x": 28.75,
+          "v": 12.5,
+          "ped_y": 2.9,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.4,
+          "x": 30.0,
+          "v": 12.5,
+          "ped_y": 2.7199999999999998,
+          "visible": true,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.5,
+          "x": 31.25,
+          "v": 12.5,
+          "ped_y": 2.5399999999999996,
+          "visible": true,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.6,
+          "x": 32.5,
+          "v": 12.5,
+          "ped_y": 2.3599999999999994,
+          "visible": true,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 2.7,
+          "x": 33.7425,
+          "v": 12.2,
+          "ped_y": 2.1799999999999993,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 2.8,
+          "x": 34.9325,
+          "v": 11.6,
+          "ped_y": 2.0,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 2.9,
+          "x": 36.0625,
+          "v": 11.0,
+          "ped_y": 1.8200000000000003,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.0,
+          "x": 37.1325,
+          "v": 10.4,
+          "ped_y": 1.6399999999999992,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.1,
+          "x": 38.1425,
+          "v": 9.8,
+          "ped_y": 1.46,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.2,
+          "x": 39.0925,
+          "v": 9.2,
+          "ped_y": 1.2799999999999985,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.3,
+          "x": 39.9825,
+          "v": 8.6,
+          "ped_y": 1.0999999999999996,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.4,
+          "x": 40.8125,
+          "v": 8.0,
+          "ped_y": 0.9199999999999999,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.5,
+          "x": 41.5825,
+          "v": 7.4,
+          "ped_y": 0.7399999999999993,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.6,
+          "x": 42.2925,
+          "v": 6.8,
+          "ped_y": 0.5599999999999996,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.65,
+          "x": 42.625,
+          "v": 6.5,
+          "ped_y": 0.46999999999999975,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Collision detected"
+        }
+      ],
+      "events": [
+        {
+          "t": 2.35,
+          "kind": "visible",
+          "text": "Pedestrian first visible to controller"
+        },
+        {
+          "t": 2.65,
+          "kind": "brake",
+          "text": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.65,
+          "kind": "collision",
+          "text": "Collision detected"
+        }
+      ],
+      "metrics": {
+        "collision": true,
+        "finished": false,
+        "impact_kmh": 23.4,
+        "duration_s": 3.65,
+        "first_seen_s": 2.35,
+        "first_brake_s": 2.65,
+        "min_clearance_m": 0,
+        "hard_brakes": 1
+      }
+    },
+    "cautious": {
+      "id": "1300eba95b",
+      "version": "blindspot-0.1",
+      "scenario": {
+        "speed_kmh": 45.0,
+        "van_gap": 3.0,
+        "emerge_s": 0.8,
+        "ped_speed": 1.8,
+        "reaction_s": 0.3,
+        "brake_mps2": 6.0,
+        "pedestrian": true
+      },
+      "policy": "cautious",
+      "frames": [
+        {
+          "t": 0.0,
+          "x": 0.0,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.1,
+          "x": 1.25,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.2,
+          "x": 2.5,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.3,
+          "x": 3.75,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.4,
+          "x": 5.0,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.5,
+          "x": 6.25,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.6,
+          "x": 7.5,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.7,
+          "x": 8.75,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.8,
+          "x": 10.0,
+          "v": 12.5,
+          "ped_y": 5.6,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 0.9,
+          "x": 11.25,
+          "v": 12.5,
+          "ped_y": 5.42,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.0,
+          "x": 12.5,
+          "v": 12.5,
+          "ped_y": 5.239999999999999,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.1,
+          "x": 13.75,
+          "v": 12.5,
+          "ped_y": 5.06,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.2,
+          "x": 15.0,
+          "v": 12.5,
+          "ped_y": 4.88,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.3,
+          "x": 16.25,
+          "v": 12.5,
+          "ped_y": 4.699999999999999,
+          "visible": false,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 1.4,
+          "x": 17.4902,
+          "v": 12.2375,
+          "ped_y": 4.52,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 1.5,
+          "x": 18.6964,
+          "v": 11.8875,
+          "ped_y": 4.34,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 1.6,
+          "x": 19.8677,
+          "v": 11.5375,
+          "ped_y": 4.159999999999999,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 1.7,
+          "x": 21.0039,
+          "v": 11.1875,
+          "ped_y": 3.9799999999999995,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 1.8,
+          "x": 22.1052,
+          "v": 10.8375,
+          "ped_y": 3.8,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 1.9,
+          "x": 23.1714,
+          "v": 10.4875,
+          "ped_y": 3.62,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.0,
+          "x": 24.2027,
+          "v": 10.1375,
+          "ped_y": 3.4399999999999995,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.1,
+          "x": 25.1989,
+          "v": 9.7875,
+          "ped_y": 3.2599999999999993,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.2,
+          "x": 26.1602,
+          "v": 9.4375,
+          "ped_y": 3.079999999999999,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.3,
+          "x": 27.0864,
+          "v": 9.0875,
+          "ped_y": 2.9,
+          "visible": false,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.4,
+          "x": 27.9777,
+          "v": 8.7375,
+          "ped_y": 2.7199999999999998,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.5,
+          "x": 28.8339,
+          "v": 8.3875,
+          "ped_y": 2.5399999999999996,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.6,
+          "x": 29.6552,
+          "v": 8.0375,
+          "ped_y": 2.3599999999999994,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.7,
+          "x": 30.4414,
+          "v": 7.6875,
+          "ped_y": 2.1799999999999993,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 2.8,
+          "x": 31.1802,
+          "v": 7.0875,
+          "ped_y": 2.0,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 2.9,
+          "x": 31.8589,
+          "v": 6.4875,
+          "ped_y": 1.8200000000000003,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.0,
+          "x": 32.4777,
+          "v": 5.8875,
+          "ped_y": 1.6399999999999992,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.1,
+          "x": 33.0364,
+          "v": 5.2875,
+          "ped_y": 1.46,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.2,
+          "x": 33.5352,
+          "v": 4.6875,
+          "ped_y": 1.2799999999999985,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.3,
+          "x": 33.9739,
+          "v": 4.0875,
+          "ped_y": 1.0999999999999996,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.4,
+          "x": 34.3527,
+          "v": 3.4875,
+          "ped_y": 0.9199999999999999,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.5,
+          "x": 34.6714,
+          "v": 2.8875,
+          "ped_y": 0.7399999999999993,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.6,
+          "x": 34.9302,
+          "v": 2.2875,
+          "ped_y": 0.5599999999999996,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.7,
+          "x": 35.1289,
+          "v": 1.6875,
+          "ped_y": 0.379999999999999,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.8,
+          "x": 35.2677,
+          "v": 1.0875,
+          "ped_y": 0.1999999999999993,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.9,
+          "x": 35.3489,
+          "v": 0.6875,
+          "ped_y": 0.020000000000000462,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 4.0,
+          "x": 35.4277,
+          "v": 0.8875,
+          "ped_y": -0.16000000000000103,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 4.1,
+          "x": 35.5264,
+          "v": 1.0875,
+          "ped_y": -0.33999999999999986,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 4.2,
+          "x": 35.6452,
+          "v": 1.2875,
+          "ped_y": -0.5200000000000014,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 4.3,
+          "x": 35.7839,
+          "v": 1.4875,
+          "ped_y": -0.7000000000000002,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 4.4,
+          "x": 35.9427,
+          "v": 1.6875,
+          "ped_y": -0.8800000000000017,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 4.5,
+          "x": 36.1189,
+          "v": 1.6875,
+          "ped_y": -1.0600000000000005,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 4.6,
+          "x": 36.2577,
+          "v": 1.0875,
+          "ped_y": -1.2400000000000002,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 4.7,
+          "x": 36.3364,
+          "v": 0.4875,
+          "ped_y": -1.4200000000000008,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 4.8,
+          "x": 36.3566,
+          "v": 0,
+          "ped_y": -1.6000000000000005,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 4.9,
+          "x": 36.3566,
+          "v": 0,
+          "ped_y": -1.7800000000000011,
+          "visible": true,
+          "a": -6.0,
+          "reason": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 5.0,
+          "x": 36.3591,
+          "v": 0.1,
+          "ped_y": -1.9600000000000009,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.1,
+          "x": 36.3791,
+          "v": 0.3,
+          "ped_y": -2.1400000000000006,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.2,
+          "x": 36.4191,
+          "v": 0.5,
+          "ped_y": -2.320000000000001,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.3,
+          "x": 36.4791,
+          "v": 0.7,
+          "ped_y": -2.5,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.4,
+          "x": 36.5591,
+          "v": 0.9,
+          "ped_y": -2.6800000000000015,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.5,
+          "x": 36.6591,
+          "v": 1.1,
+          "ped_y": -2.860000000000001,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.6,
+          "x": 36.7791,
+          "v": 1.3,
+          "ped_y": -3.040000000000001,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.7,
+          "x": 36.9191,
+          "v": 1.5,
+          "ped_y": -3.2200000000000006,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.8,
+          "x": 37.0791,
+          "v": 1.7,
+          "ped_y": -3.4000000000000004,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 5.9,
+          "x": 37.2591,
+          "v": 1.9,
+          "ped_y": -3.580000000000002,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 6.0,
+          "x": 37.4591,
+          "v": 2.1,
+          "ped_y": -3.7600000000000016,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 6.1,
+          "x": 37.6791,
+          "v": 2.3,
+          "ped_y": -3.9399999999999995,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 6.2,
+          "x": 37.9191,
+          "v": 2.5,
+          "ped_y": -4.120000000000001,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 6.3,
+          "x": 38.1791,
+          "v": 2.7,
+          "ped_y": -4.300000000000001,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 6.4,
+          "x": 38.4591,
+          "v": 2.9,
+          "ped_y": -4.480000000000002,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 6.5,
+          "x": 38.7591,
+          "v": 3.1,
+          "ped_y": -4.66,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 6.6,
+          "x": 39.0791,
+          "v": 3.3,
+          "ped_y": -4.84,
+          "visible": true,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 6.7,
+          "x": 39.4091,
+          "v": 3.3,
+          "ped_y": -5.020000000000001,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 6.8,
+          "x": 39.7216,
+          "v": 2.95,
+          "ped_y": -5.200000000000001,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 6.9,
+          "x": 39.9991,
+          "v": 2.6,
+          "ped_y": -5.380000000000001,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 7.0,
+          "x": 40.2416,
+          "v": 2.25,
+          "ped_y": -5.5600000000000005,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 7.1,
+          "x": 40.4491,
+          "v": 1.9,
+          "ped_y": -5.74,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 7.2,
+          "x": 40.6259,
+          "v": 1.725,
+          "ped_y": -5.920000000000002,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 7.3,
+          "x": 40.8084,
+          "v": 1.925,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 7.4,
+          "x": 41.0109,
+          "v": 2.125,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 7.5,
+          "x": 41.2334,
+          "v": 2.325,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 7.6,
+          "x": 41.4759,
+          "v": 2.525,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 7.7,
+          "x": 41.7384,
+          "v": 2.725,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 7.8,
+          "x": 42.0209,
+          "v": 2.925,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 7.9,
+          "x": 42.3234,
+          "v": 3.125,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 8.0,
+          "x": 42.6453,
+          "v": 3.275,
+          "ped_y": -6,
+          "visible": true,
+          "a": 0,
+          "reason": "Maintain speed"
+        },
+        {
+          "t": 8.1,
+          "x": 42.9717,
+          "v": 3.1875,
+          "ped_y": -6,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 8.2,
+          "x": 43.273,
+          "v": 2.8375,
+          "ped_y": -6,
+          "visible": true,
+          "a": -3.5,
+          "reason": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 8.3,
+          "x": 43.5392,
+          "v": 2.4875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 8.4,
+          "x": 43.798,
+          "v": 2.6875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 8.5,
+          "x": 44.0767,
+          "v": 2.8875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 8.6,
+          "x": 44.3755,
+          "v": 3.0875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 8.7,
+          "x": 44.6942,
+          "v": 3.2875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 8.8,
+          "x": 45.033,
+          "v": 3.4875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 8.9,
+          "x": 45.3917,
+          "v": 3.6875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.0,
+          "x": 45.7705,
+          "v": 3.8875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.1,
+          "x": 46.1692,
+          "v": 4.0875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.2,
+          "x": 46.588,
+          "v": 4.2875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.3,
+          "x": 47.0267,
+          "v": 4.4875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.4,
+          "x": 47.4855,
+          "v": 4.6875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.5,
+          "x": 47.9642,
+          "v": 4.8875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.6,
+          "x": 48.463,
+          "v": 5.0875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.7,
+          "x": 48.9817,
+          "v": 5.2875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.8,
+          "x": 49.5205,
+          "v": 5.4875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 9.9,
+          "x": 50.0792,
+          "v": 5.6875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.0,
+          "x": 50.658,
+          "v": 5.8875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.1,
+          "x": 51.2567,
+          "v": 6.0875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.2,
+          "x": 51.8755,
+          "v": 6.2875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.3,
+          "x": 52.5142,
+          "v": 6.4875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.4,
+          "x": 53.173,
+          "v": 6.6875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.5,
+          "x": 53.8517,
+          "v": 6.8875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.6,
+          "x": 54.5505,
+          "v": 7.0875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.7,
+          "x": 55.2692,
+          "v": 7.2875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.8,
+          "x": 56.008,
+          "v": 7.4875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.9,
+          "x": 56.7667,
+          "v": 7.6875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Return to target speed"
+        },
+        {
+          "t": 10.95,
+          "x": 57.1536,
+          "v": 7.7875,
+          "ped_y": -6,
+          "visible": true,
+          "a": 2,
+          "reason": "Road segment completed"
+        }
+      ],
+      "events": [
+        {
+          "t": 1.325,
+          "kind": "brake",
+          "text": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 2.4,
+          "kind": "visible",
+          "text": "Pedestrian first visible to controller"
+        },
+        {
+          "t": 10.95,
+          "kind": "finish",
+          "text": "Road segment completed"
+        }
+      ],
+      "metrics": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 10.95,
+        "first_seen_s": 2.4,
+        "first_brake_s": 1.325,
+        "min_clearance_m": 4.8,
+        "hard_brakes": 2
+      }
+    }
+  }
+}
