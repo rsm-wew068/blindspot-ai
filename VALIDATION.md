@@ -45,3 +45,7 @@ Across the four completed inference requests (including the discarded initial tr
 ## Hosting preparation — 5 October 2026
 
 All 25 automated tests pass, including hosted authentication, origin checks, AI allowance persistence, disabled-AI behavior, and export handling. Render origin configuration is covered. JavaScript syntax and Git whitespace checks pass. The container image and public Render endpoint still require deployment verification.
+
+## 3D replay verification — 5 October 2026
+
+26 Python tests pass, including authenticated delivery of the local Three.js module and rejection of private-file paths. Browser checks passed for camera switches, scrubbing, timestamp preservation across controllers, pedestrian-free replay, mobile layout without horizontal overflow, and the WebGL-context-loss fallback. Desktop and mobile screenshots were inspected; no browser JavaScript errors were observed. Graphics use simulation replay frames; physics is unchanged. No paid inference was performed.

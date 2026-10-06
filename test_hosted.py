@@ -31,8 +31,17 @@ class HostedTests(unittest.TestCase):
 
     def test_health_is_public_but_app_and_jobs_are_private(self):
         self.assertTrue(self.call('/healthz',auth=False)[0].startswith('200'))
-        for path in ('/','/app.js','/api/status','/api/jobs/example'):
+        for path in ('/','/app.js','/street.js','/vendor/three.module.min.js','/api/status','/api/jobs/example'):
             self.assertTrue(self.call(path,auth=False)[0].startswith('401'))
+
+    def test_3d_assets_are_served_with_javascript_mime(self):
+        for path in ('/street.js', '/vendor/three.module.min.js'):
+            status, headers, body = self.call(path)
+            self.assertTrue(status.startswith('200'))
+            self.assertIn('text/javascript', headers['Content-Type'])
+            self.assertGreater(len(body), 100)
+        self.assertTrue(self.call('/.env.local')[0].startswith('404'))
+        self.assertTrue(self.call('/vendor/../../.env.local')[0].startswith('404'))
 
     def test_missing_password_fails_closed(self):
         os.environ.pop('BLINDSPOT_PASSWORD')

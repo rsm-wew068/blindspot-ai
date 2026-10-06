@@ -61,6 +61,12 @@ The independent evaluation suite uses seed 90210 and 24 scenarios, excluded from
 
 The current prototype implements local one-variable counterfactuals. It does not yet implement global failure minimization, arbitrary user controller uploads, learned vehicle control, photorealistic simulation, cloud batch execution, or a validated AI-versus-search benchmark. Live Nebius inference has been smoke-tested; cloud deployment remains unverified. This is not yet a complete hackathon submission.
 
+## 3D replay
+
+Three.js 0.169.0 is vendored locally under its MIT license. Chase, driver, and bird’s-eye cameras display the same recorded positions as the 2D map; switching controllers preserves replay time (clamped to the selected run’s end). The optional hidden-area overlay projects the van’s ground-plane occlusion from the simulated vehicle-front sensor. The HUD reports the simulator’s visibility flag, speed, braking and outcome.
+
+The street is original procedural geometry. Buildings, trees, lights and background parked vehicles are decorative and do not enter the physics or sensing model. This is a stylized 3D visualization of a 2D simulation, not camera-based perception or a full 3D driving simulator. WebGL failure falls back to the existing 2D replay. No new API calls or keys are needed for graphics.
+
 ## Deploy
 
 See [hosting setup](DEPLOYMENT.md) for the Render free preview and live-AI setup.

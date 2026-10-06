@@ -96,6 +96,9 @@ def application(environ, start_response):
                 snapshot = dict(job) if job else None
             return send(200 if snapshot else 404, snapshot or {"error":"Run not found; the deployment may have restarted."})
         assets = {"/":("index.html","text/html; charset=utf-8"),"/app.js":("app.js","text/javascript; charset=utf-8"),"/styles.css":("styles.css","text/css; charset=utf-8")}
+        assets.update({"/street.js": ("street.js", "text/javascript; charset=utf-8"),
+                       "/vendor/three.module.min.js": ("vendor/three.module.min.js", "text/javascript; charset=utf-8"),
+                       "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain; charset=utf-8")})
         if path in assets:
             name, mime = assets[path]
             return send(200, (ROOT/"static"/name).read_bytes(), mime)

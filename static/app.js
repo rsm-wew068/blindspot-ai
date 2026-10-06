@@ -2,6 +2,7 @@
 const $ = id => document.getElementById(id);
 const mappings = {speed:['speed_kmh','km/h'],gap:['van_gap','m'],emerge:['emerge_s','s'],reaction:['reaction_s','s'],pedSpeed:['ped_speed','m/s'],brake:['brake_mps2','m/s²']};
 const defaults = {speed_kmh:45,van_gap:3,emerge_s:.8,reaction_s:.3,ped_speed:1.8,brake_mps2:6,pedestrian:true};
+let streetView=null, cameraMode='chase';
 let pair = null, policy = 'reactive', playing = false, time = 0, lastTick = 0, dirty = false, busy = false;
 let runs = [], connection = {}, toastTimer, sequence = 0;
 try { const saved = JSON.parse(localStorage.getItem('blindspot-runs-v1') || '[]'); if (Array.isArray(saved)) runs = saved.filter(r=>r && Array.isArray(r.rows) && r.summary).slice(0,8); } catch {}
@@ -16,7 +17,7 @@ function setPlaying(value){playing=value;$('playBtn').textContent=playing?'Ⅱ':
 async function simulate(s=scenario(),auto=false){const seq=++sequence;$('simulateBtn').disabled=true;try{const result=await request('/api/simulate',{scenario:s});if(seq!==sequence)return;pair=result;setScenario(result.reactive.scenario);dirty=false;time=0;setPlaying(auto);$('simulateBtn').firstChild.textContent='Run this scenario ';$('scenarioId').textContent='CASE / '+pair.reactive.id.toUpperCase();renderComparison();draw();}catch(e){toast(e.message,true);}finally{if(seq===sequence)$('simulateBtn').disabled=false;}}
 $('simulateBtn').onclick=()=>simulate(scenario(),true);
 $('resetBtn').onclick=()=>simulate(defaults);
-function selectPolicy(next){policy=next;$('reactiveTab').classList.toggle('selected',policy==='reactive');$('cautiousTab').classList.toggle('selected',policy==='cautious');time=0;setPlaying(false);draw();}
+function selectPolicy(next){policy=next;$('reactiveTab').classList.toggle('selected',policy==='reactive');$('cautiousTab').classList.toggle('selected',policy==='cautious');time=pair?Math.min(time,pair[policy].metrics.duration_s):0;setPlaying(false);draw();}
 $('reactiveTab').onclick=()=>selectPolicy('reactive');$('cautiousTab').onclick=()=>selectPolicy('cautious');
 $('playBtn').onclick=()=>{if(!pair)return;const duration=pair[policy].metrics.duration_s;if(time>=duration)time=0;setPlaying(!playing);};
 $('timeline').oninput=()=>{if(!pair)return;setPlaying(false);time=Number($('timeline').value)/1000*pair[policy].metrics.duration_s;draw();};
@@ -41,6 +42,7 @@ text('APPROACH →',24,Y(-4.7)+23,'#98a38c',8);text('45 m',X(45),Y(-4.7)+23,'#98
 const s=pair?pair.reactive.scenario:defaults;const vanStart=45-s.van_gap-5,vanEnd=45-s.van_gap;
 let frame={x:0,v:s.speed_kmh/3.6,ped_y:s.pedestrian?5.6:null,visible:false,a:0,reason:'Ready'};
 if(pair){const r=pair[policy];frame=r.frames[0];for(const f of r.frames){if(f.t>time)break;frame=f;}const idx=r.frames.indexOf(frame);const next=r.frames[idx+1];if(next&&next.t>frame.t){const blend=(time-frame.t)/(next.t-frame.t);frame={...frame,x:frame.x+(next.x-frame.x)*blend,v:frame.v+(next.v-frame.v)*blend,ped_y:frame.ped_y===null?null:frame.ped_y+(next.ped_y-frame.ped_y)*blend};}}
+if(streetView)streetView.update(frame,s,time,!!(pair&&time>=pair[policy].metrics.duration_s&&pair[policy].metrics.collision));
 // Project the obstacle's angular shadow from the vehicle-front sensor.
 const sensorX=frame.x+2.1;const corners=[[vanStart,2.2],[vanEnd,2.2],[vanStart,4.8],[vanEnd,4.8]];
 let rays=corners.map(([x,y])=>({x,y,angle:Math.atan2(y,x-sensorX)})).sort((a,b)=>a.angle-b.angle);const near=rays[0],far=rays[rays.length-1],min=near.angle,max=far.angle;ctx.save();ctx.beginPath();ctx.rect(0,42,w,h-76);ctx.clip();ctx.fillStyle='#c4d49570';ctx.beginPath();ctx.moveTo(X(near.x),Y(near.y));ctx.lineTo(X(sensorX+80*Math.cos(min)),Y(80*Math.sin(min)));ctx.lineTo(X(sensorX+80*Math.cos(max)),Y(80*Math.sin(max)));ctx.lineTo(X(far.x),Y(far.y));ctx.closePath();ctx.fill();ctx.restore();
@@ -72,3 +74,25 @@ $('labNav').onclick=()=>{$('labNav').classList.add('active');$('runsNav').classL
 $('counterBtn').onclick=async()=>{if(!pair)return;$('counterBtn').disabled=true;try{const report=await request('/api/counterfactuals',{scenario:pair.reactive.scenario,policy});const box=$('counterBody');box.replaceChildren(el('p',`Selected controller: ${policy==='reactive'?'Reactive':'Occlusion-aware'}. Original outcome: ${report.base.metrics.collision?'collision':'no collision'}.`));for(const variant of report.interventions){const row=el('div',undefined,'counter-row');const name={speed_kmh:'Speed (km/h)',reaction_s:'Response delay (s)',van_gap:'Van gap (m)',pedestrian:'Pedestrian present'}[variant.change];row.append(el('span',`${name}: ${variant.from} → ${variant.to}`));row.append(el('span',variant.metrics.collision?'COLLISION':variant.metrics.finished?'COMPLETED':'TIME LIMIT','pill '+(variant.metrics.collision?'bad':'good')));const open=el('button','Replay ↗','text-btn');open.onclick=()=>{$('counterDialog').close();simulate(variant.scenario,true);};row.append(open);box.append(row);}const save=el('button','Export comparisons ↓','outline');save.onclick=()=>download(report,'blindspot-input-comparisons.json');box.append(save);$('counterDialog').showModal();}catch(e){toast(e.message,true);}finally{$('counterBtn').disabled=false;}};
 async function init(){labels();renderNotebook();try{const status=await request('/api/status');connection=status.connection;if(status.deployment==='hosted'){$('connectionDialog').querySelector('ol').textContent='Hosting configuration is managed by the project owner. The simulator works without live AI.';$('connectionDialog').querySelectorAll('p').forEach(p=>p.textContent='Live AI, when enabled by the owner, sends synthetic tests to Nebius. Hosted runs have a shared daily allowance.');$('budget').value='12';}if(connection.configured){$('connectionLabel').textContent='Nebius key configured';$('connectionDetail').textContent='A key is configured on the server. The live connection and model will be verified when you start an AI investigation.';}else $('connectionLabel').textContent='Local simulation';}catch(e){toast(e.message,true);}await simulate(defaults);}
 init();
+
+function changeCamera(mode){
+  cameraMode=mode;
+  const use3d=!!streetView&&mode!=='2d';
+  $('streetScene').hidden=!use3d;$('drivingHud').hidden=!use3d;
+  $('scene').style.visibility=use3d?'hidden':'visible';
+  $('sceneWrap').classList.toggle('street-active',use3d);
+  $('viewLabel').textContent=use3d?({chase:'Chase camera',driver:'Driver view',overview:'Bird’s-eye'}[mode]):'2D map';
+  document.querySelectorAll('[data-camera]').forEach(b=>{const active=b.dataset.camera===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+  $('showOcclusion').disabled=!use3d;
+  if(use3d)streetView.setCamera(mode);
+  draw();
+}
+for(const button of document.querySelectorAll('[data-camera]'))button.onclick=()=>changeCamera(button.dataset.camera);
+$('showOcclusion').onchange=()=>streetView?.setOcclusion($('showOcclusion').checked);
+function fallBackToMap(){
+  streetView=null;changeCamera('2d');
+  document.querySelectorAll('[data-camera]').forEach(b=>{if(b.dataset.camera!=='2d')b.disabled=true;});
+  toast('3D is unavailable in this browser. The 2D replay remains available.');
+}
+$('streetScene').addEventListener('webglcontextlost',event=>{event.preventDefault();fallBackToMap();});
+import('/street.js').then(({createStreet})=>{streetView=createStreet($('streetScene'));changeCamera(cameraMode);}).catch(fallBackToMap);
