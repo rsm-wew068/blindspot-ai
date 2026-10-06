@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: blindspot-ai
+    runtime: docker
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: BLINDSPOT_PASSWORD
+        generateValue: true
+      - key: BLINDSPOT_ENABLE_AI
+        value: "0"
+      - key: NEBIUS_MODEL
+        value: nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B

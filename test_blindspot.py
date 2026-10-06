@@ -106,6 +106,21 @@ class InvestigationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,"invalid scenario batch"):
                 investigation.propose("nvidia/test", "test", [], 4)
 
+    def test_structured_output_requests_full_bounded_scenarios(self):
+        response = {"choices": [{"message": {"content": json.dumps({
+            "hypothesis": "test", "scenarios": [asdict(Scenario())] * 4})}}]}
+        with patch.object(investigation, "api", return_value=response) as api:
+            scenarios, _, _ = investigation.propose("nvidia/test", "test", [], 4)
+        schema = api.call_args[0][1]["response_format"]["json_schema"]["schema"]
+        self.assertEqual(schema["properties"]["scenarios"]["minItems"], 4)
+        self.assertEqual(len(scenarios), 4)
+
+    def test_incomplete_or_null_model_outputs_are_rejected(self):
+        for content in (None, json.dumps({"hypothesis": "test", "scenarios": [{}] * 4})):
+            with patch.object(investigation, "api", return_value={"choices": [{"message": {"content": content}}]}):
+                with self.assertRaisesRegex(ValueError, "invalid scenario batch"):
+                    investigation.propose("nvidia/test", "test", [], 4)
+
     def test_search_budget_is_bounded(self):
         for budget in (0,49,True,4.2):
             with self.assertRaises(ValueError):

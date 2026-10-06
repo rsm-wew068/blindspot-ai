@@ -69,6 +69,18 @@ def systematic_scenario(i, count):
     return Scenario.parse(values)
 
 
+def proposal_schema(count):
+    properties = {name: {"type": "number", "minimum": lo, "maximum": hi}
+                  for name, (lo, hi) in BOUNDS.items()}
+    properties["pedestrian"] = {"type": "boolean"}
+    return {"type": "object", "additionalProperties": False,
+            "required": ["hypothesis", "scenarios"], "properties": {
+                "hypothesis": {"type": "string", "maxLength": 2000},
+                "scenarios": {"type": "array", "minItems": count, "maxItems": count,
+                    "items": {"type": "object", "additionalProperties": False,
+                              "required": list(properties), "properties": properties}}}}
+
+
 def propose(model, concern, history, count):
     system = ("You are a test-design agent for a simplified autonomous-driving simulator. "
               "Return only a JSON object with a 'hypothesis' string and 'scenarios' array. "
@@ -83,15 +95,23 @@ def propose(model, concern, history, count):
     response = api("/chat/completions", {"model": model, "messages": [
         {"role": "system", "content": system},
         {"role": "user", "content": json.dumps({"concern": concern, "bounds": BOUNDS,
-          "schema": asdict(Scenario()), "required_count": count, "previous_results": history})}],
-        "temperature": 0.3, "max_tokens": 4096})
+          "schema": proposal_schema(count), "example_scenario": asdict(Scenario()), "required_count": count, "previous_results": history})}],
+        "temperature": 0.3, "max_tokens": 4096,
+        "response_format": {"type": "json_schema", "json_schema": {
+            "name": "scenario_batch", "strict": True, "schema": proposal_schema(count)}}})
     try:
-        content = response["choices"][0]["message"]["content"].strip()
+        message = response["choices"][0]["message"]
+        content = message.get("content")
+        if message.get("refusal") or not isinstance(content, str):
+            raise ValueError()
+        content = content.strip()
         if content.startswith("```"):
             content = content.split("\n", 1)[1].rsplit("```", 1)[0]
         parsed = json.loads(content)
         scenarios = parsed["scenarios"]
         if not isinstance(scenarios, list) or len(scenarios) != count:
+            raise ValueError()
+        if any(not isinstance(item, dict) or set(item) != set(asdict(Scenario())) for item in scenarios):
             raise ValueError()
         validated = [Scenario.parse(item) for item in scenarios]
         hypothesis = parsed.get("hypothesis", "")

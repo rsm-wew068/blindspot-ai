@@ -1,0 +1,1363 @@
+{
+  "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+  "limit_usd": 1,
+  "prior_reserved_usd": 0.2533,
+  "requests": [
+    {
+      "request": 1,
+      "reserved_usd": 0.08598,
+      "usage": {
+        "completion_tokens": 1106,
+        "prompt_tokens": 699,
+        "total_tokens": 1805,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "request": 2,
+      "reserved_usd": 0.12172,
+      "usage": {
+        "completion_tokens": 3786,
+        "prompt_tokens": 2226,
+        "total_tokens": 6012,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "note": "Conservative accounting uses $10 per million tokens, not account billing. This retry allows at most two requests.",
+  "ai": {
+    "version": "blindspot-0.1",
+    "mode": "ai",
+    "seed": 17,
+    "budget": 12,
+    "concern": "Find scenarios where a pedestrian emerging from behind the van causes a collision. Use measured results to refine tests for either controller.",
+    "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "elapsed_s": 27.15,
+    "summary": {
+      "reactive": {
+        "tests": 12,
+        "collisions": 7,
+        "completed": 5,
+        "first_failure_test": 2,
+        "mean_completion_s": 8.18
+      },
+      "cautious": {
+        "tests": 12,
+        "collisions": 2,
+        "completed": 10,
+        "first_failure_test": 10,
+        "mean_completion_s": 7.9
+      }
+    },
+    "rows": [
+      {
+        "index": 1,
+        "id": "f567c3aa00",
+        "scenario": {
+          "speed_kmh": 30.0,
+          "van_gap": 2.0,
+          "emerge_s": 0.5,
+          "ped_speed": 1.2,
+          "reaction_s": 0.2,
+          "brake_mps2": 5.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 11.075,
+          "first_seen_s": 3.1,
+          "first_brake_s": 3.5,
+          "min_clearance_m": 3.33,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 12.4,
+          "first_seen_s": 3.125,
+          "first_brake_s": 2.2,
+          "min_clearance_m": 3.453,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 2,
+        "id": "eeef968f85",
+        "scenario": {
+          "speed_kmh": 45.0,
+          "van_gap": 4.0,
+          "emerge_s": 1.0,
+          "ped_speed": 1.8,
+          "reaction_s": 0.4,
+          "brake_mps2": 6.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 27.72,
+          "duration_s": 3.575,
+          "first_seen_s": 2.375,
+          "first_brake_s": 2.775,
+          "min_clearance_m": 0,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 11.05,
+          "first_seen_s": 2.425,
+          "first_brake_s": 1.425,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 3,
+        "id": "a87d0a2e69",
+        "scenario": {
+          "speed_kmh": 55.0,
+          "van_gap": 6.0,
+          "emerge_s": 2.0,
+          "ped_speed": 2.0,
+          "reaction_s": 0.6,
+          "brake_mps2": 8.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.75,
+          "first_seen_s": 2.15,
+          "first_brake_s": null,
+          "min_clearance_m": 2.177,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 4.85,
+          "first_seen_s": 2.2,
+          "first_brake_s": 1.425,
+          "min_clearance_m": 0.983,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 4,
+        "id": "104bd78536",
+        "scenario": {
+          "speed_kmh": 25.0,
+          "van_gap": 1.0,
+          "emerge_s": 0.2,
+          "ped_speed": 0.9,
+          "reaction_s": 0.1,
+          "brake_mps2": 3.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 12.725,
+          "first_seen_s": 0.0,
+          "first_brake_s": 4.05,
+          "min_clearance_m": 2.442,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 13.75,
+          "first_seen_s": 0.0,
+          "first_brake_s": 2.15,
+          "min_clearance_m": 2.584,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 5,
+        "id": "fad79846d1",
+        "scenario": {
+          "speed_kmh": 60.0,
+          "van_gap": 8.0,
+          "emerge_s": 3.5,
+          "ped_speed": 2.3,
+          "reaction_s": 0.9,
+          "brake_mps2": 9.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.425,
+          "first_seen_s": 1.8,
+          "first_brake_s": null,
+          "min_clearance_m": 4.4,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.95,
+          "first_seen_s": 1.8,
+          "first_brake_s": 1.675,
+          "min_clearance_m": 4.4,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 6,
+        "id": "801040810c",
+        "scenario": {
+          "speed_kmh": 35.0,
+          "van_gap": 5.0,
+          "emerge_s": 0.8,
+          "ped_speed": 1.5,
+          "reaction_s": 0.3,
+          "brake_mps2": 4.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 9.925,
+          "first_seen_s": 2.525,
+          "first_brake_s": 2.825,
+          "min_clearance_m": 2.978,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 12.225,
+          "first_seen_s": 2.575,
+          "first_brake_s": 1.6,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 7,
+        "id": "4e8146822c",
+        "scenario": {
+          "speed_kmh": 60.0,
+          "van_gap": 1.0,
+          "emerge_s": 0.1,
+          "ped_speed": 2.5,
+          "reaction_s": 0.0,
+          "brake_mps2": 3.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 45.96,
+          "duration_s": 2.725,
+          "first_seen_s": 0.0,
+          "first_brake_s": 1.425,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 4.3,
+          "first_seen_s": 0.0,
+          "first_brake_s": 0.775,
+          "min_clearance_m": 0.451,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 8,
+        "id": "09252c0496",
+        "scenario": {
+          "speed_kmh": 58.0,
+          "van_gap": 1.2,
+          "emerge_s": 0.2,
+          "ped_speed": 2.4,
+          "reaction_s": 0.1,
+          "brake_mps2": 3.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 46.12,
+          "duration_s": 2.775,
+          "first_seen_s": 1.575,
+          "first_brake_s": 1.675,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 4.5,
+          "first_seen_s": 1.575,
+          "first_brake_s": 0.9,
+          "min_clearance_m": 0.16,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 9,
+        "id": "2a7f6bee67",
+        "scenario": {
+          "speed_kmh": 55.0,
+          "van_gap": 1.0,
+          "emerge_s": 0.3,
+          "ped_speed": 2.3,
+          "reaction_s": 0.1,
+          "brake_mps2": 3.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 43.12,
+          "duration_s": 2.925,
+          "first_seen_s": 0.0,
+          "first_brake_s": 1.825,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 5.0,
+          "first_seen_s": 0.0,
+          "first_brake_s": 0.925,
+          "min_clearance_m": 0.276,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 10,
+        "id": "7226e0ec08",
+        "scenario": {
+          "speed_kmh": 53.0,
+          "van_gap": 1.1,
+          "emerge_s": 0.4,
+          "ped_speed": 2.2,
+          "reaction_s": 0.2,
+          "brake_mps2": 3.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 43.01,
+          "duration_s": 3.0,
+          "first_seen_s": 0.0,
+          "first_brake_s": 2.075,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 26.81,
+          "duration_s": 3.5,
+          "first_seen_s": 0.0,
+          "first_brake_s": 1.075,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 11,
+        "id": "fde605be7c",
+        "scenario": {
+          "speed_kmh": 50.0,
+          "van_gap": 1.3,
+          "emerge_s": 0.5,
+          "ped_speed": 2.0,
+          "reaction_s": 0.2,
+          "brake_mps2": 3.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 40.82,
+          "duration_s": 3.15,
+          "first_seen_s": 2.1,
+          "first_brake_s": 2.3,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 20.03,
+          "duration_s": 3.9,
+          "first_seen_s": 2.1,
+          "first_brake_s": 1.125,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 12,
+        "id": "12825e606d",
+        "scenario": {
+          "speed_kmh": 48.0,
+          "van_gap": 1.0,
+          "emerge_s": 0.6,
+          "ped_speed": 1.9,
+          "reaction_s": 0.2,
+          "brake_mps2": 3.0,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 39.63,
+          "duration_s": 3.275,
+          "first_seen_s": 0.0,
+          "first_brake_s": 2.5,
+          "min_clearance_m": 0,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 7.0,
+          "first_seen_s": 0.0,
+          "first_brake_s": 1.15,
+          "min_clearance_m": 0.275,
+          "hard_brakes": 0
+        }
+      }
+    ],
+    "rounds": [
+      {
+        "first_test": 1,
+        "last_test": 6,
+        "hypothesis": "Collision occurs when a pedestrian emerges from behind a parked van into the path of a vehicle traveling at moderate speed, with insufficient braking reaction within the available time, leading to impact before the vehicle can stop.",
+        "usage": {
+          "completion_tokens": 1106,
+          "prompt_tokens": 699,
+          "total_tokens": 1805,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        }
+      },
+      {
+        "first_test": 7,
+        "last_test": 12,
+        "hypothesis": "Collision is expected when the vehicle speed is high (>=55 km/h), the van is positioned very close (gap <=1.5 m), the pedestrian emerges early (emerge_s <=0.5 s), walks fast (ped_speed >=2 m/s), the driver reacts slowly (reaction_s <=0.2 s) and applies minimal braking (brake_mps2 <=3 m/s^2). Under these conditions both the reactive and cautious controllers fail to avoid impact.",
+        "usage": {
+          "completion_tokens": 3786,
+          "prompt_tokens": 2226,
+          "total_tokens": 6012,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        }
+      }
+    ],
+    "unique_scenarios": 12,
+    "note": "AI hypotheses are proposals, not causal evidence. Measurements come from the simulator. Saved scenarios replay deterministically; live model proposals may vary."
+  },
+  "random": {
+    "version": "blindspot-0.1",
+    "mode": "random",
+    "seed": 17,
+    "budget": 12,
+    "concern": "Investigate hidden pedestrians near a crosswalk",
+    "model": null,
+    "elapsed_s": 0.04,
+    "summary": {
+      "reactive": {
+        "tests": 12,
+        "collisions": 1,
+        "completed": 11,
+        "first_failure_test": 9,
+        "mean_completion_s": 7.06
+      },
+      "cautious": {
+        "tests": 12,
+        "collisions": 0,
+        "completed": 12,
+        "first_failure_test": null,
+        "mean_completion_s": 9.49
+      }
+    },
+    "rows": [
+      {
+        "index": 1,
+        "id": "fd840201f7",
+        "scenario": {
+          "speed_kmh": 41.099,
+          "van_gap": 9.874,
+          "emerge_s": 5.763,
+          "ped_speed": 1.292,
+          "reaction_s": 0.766,
+          "brake_mps2": 7.225,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 5.0,
+          "first_seen_s": 2.35,
+          "first_brake_s": null,
+          "min_clearance_m": 4.4,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 9.075,
+          "first_seen_s": 2.375,
+          "first_brake_s": 1.9,
+          "min_clearance_m": 1.958,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 2,
+        "id": "114a556cd6",
+        "scenario": {
+          "speed_kmh": 20.508,
+          "van_gap": 1.296,
+          "emerge_s": 2.305,
+          "ped_speed": 2.069,
+          "reaction_s": 0.252,
+          "brake_mps2": 6.01,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 10.025,
+          "first_seen_s": 3.9,
+          "first_brake_s": 5.9,
+          "min_clearance_m": 3.686,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 13.125,
+          "first_seen_s": 3.9,
+          "first_brake_s": 4.925,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 3,
+        "id": "d6dfd3d750",
+        "scenario": {
+          "speed_kmh": 57.316,
+          "van_gap": 11.397,
+          "emerge_s": 2.41,
+          "ped_speed": 2.497,
+          "reaction_s": 0.062,
+          "brake_mps2": 7.876,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.6,
+          "first_seen_s": 1.525,
+          "first_brake_s": null,
+          "min_clearance_m": 2.949,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 5.375,
+          "first_seen_s": 1.575,
+          "first_brake_s": 0.875,
+          "min_clearance_m": 0.399,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 4,
+        "id": "d87ecac0b9",
+        "scenario": {
+          "speed_kmh": 22.546,
+          "van_gap": 8.761,
+          "emerge_s": 3.353,
+          "ped_speed": 2.424,
+          "reaction_s": 0.21,
+          "brake_mps2": 6.24,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 11.225,
+          "first_seen_s": 3.925,
+          "first_brake_s": 5.375,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 12.55,
+          "first_seen_s": 3.925,
+          "first_brake_s": 4.3,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 5,
+        "id": "bf38f8bd80",
+        "scenario": {
+          "speed_kmh": 46.939,
+          "van_gap": 4.401,
+          "emerge_s": 0.491,
+          "ped_speed": 2.398,
+          "reaction_s": 0.474,
+          "brake_mps2": 8.978,
+          "pedestrian": false
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 4.375,
+          "first_seen_s": null,
+          "first_brake_s": null,
+          "min_clearance_m": null,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 7.725,
+          "first_seen_s": null,
+          "first_brake_s": 1.45,
+          "min_clearance_m": null,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 6,
+        "id": "ee3a24acd5",
+        "scenario": {
+          "speed_kmh": 55.61,
+          "van_gap": 9.947,
+          "emerge_s": 5.52,
+          "ped_speed": 0.83,
+          "reaction_s": 0.372,
+          "brake_mps2": 3.31,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.7,
+          "first_seen_s": 1.725,
+          "first_brake_s": null,
+          "min_clearance_m": 4.4,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 4.85,
+          "first_seen_s": 1.75,
+          "first_brake_s": 1.2,
+          "min_clearance_m": 4.4,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 7,
+        "id": "e2d08c49ef",
+        "scenario": {
+          "speed_kmh": 32.732,
+          "van_gap": 11.555,
+          "emerge_s": 2.249,
+          "ped_speed": 2.116,
+          "reaction_s": 0.868,
+          "brake_mps2": 4.434,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 10.525,
+          "first_seen_s": 2.5,
+          "first_brake_s": 3.375,
+          "min_clearance_m": 2.592,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 13.675,
+          "first_seen_s": 2.5,
+          "first_brake_s": 2.275,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 8,
+        "id": "f7d0bef5e9",
+        "scenario": {
+          "speed_kmh": 62.87,
+          "van_gap": 6.796,
+          "emerge_s": 2.158,
+          "ped_speed": 1.254,
+          "reaction_s": 0.786,
+          "brake_mps2": 4.156,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.275,
+          "first_seen_s": 1.825,
+          "first_brake_s": null,
+          "min_clearance_m": 3.694,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.75,
+          "first_seen_s": 1.825,
+          "first_brake_s": 1.525,
+          "min_clearance_m": 3.447,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 9,
+        "id": "a7c04f53a9",
+        "scenario": {
+          "speed_kmh": 42.777,
+          "van_gap": 7.088,
+          "emerge_s": 0.777,
+          "ped_speed": 1.92,
+          "reaction_s": 0.917,
+          "brake_mps2": 4.913,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": true,
+          "finished": false,
+          "impact_kmh": 26.42,
+          "duration_s": 3.775,
+          "first_seen_s": 1.925,
+          "first_brake_s": 2.85,
+          "min_clearance_m": 0,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 9.5,
+          "first_seen_s": 1.925,
+          "first_brake_s": 2.0,
+          "min_clearance_m": 2.005,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 10,
+        "id": "d6c510985f",
+        "scenario": {
+          "speed_kmh": 60.452,
+          "van_gap": 7.362,
+          "emerge_s": 1.635,
+          "ped_speed": 0.817,
+          "reaction_s": 0.753,
+          "brake_mps2": 5.088,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.4,
+          "first_seen_s": 1.825,
+          "first_brake_s": null,
+          "min_clearance_m": 3.428,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.975,
+          "first_seen_s": 1.85,
+          "first_brake_s": 1.55,
+          "min_clearance_m": 3.228,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 11,
+        "id": "92d0535530",
+        "scenario": {
+          "speed_kmh": 28.625,
+          "van_gap": 7.964,
+          "emerge_s": 4.374,
+          "ped_speed": 1.327,
+          "reaction_s": 0.075,
+          "brake_mps2": 8.921,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 7.175,
+          "first_seen_s": 3.75,
+          "first_brake_s": null,
+          "min_clearance_m": 2.263,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 14.175,
+          "first_seen_s": 3.875,
+          "first_brake_s": 3.15,
+          "min_clearance_m": 2.694,
+          "hard_brakes": 5
+        }
+      },
+      {
+        "index": 12,
+        "id": "c31e6195d8",
+        "scenario": {
+          "speed_kmh": 16.033,
+          "van_gap": 7.206,
+          "emerge_s": 4.116,
+          "ped_speed": 1.485,
+          "reaction_s": 0.732,
+          "brake_mps2": 8.759,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 15.325,
+          "first_seen_s": 5.475,
+          "first_brake_s": 7.875,
+          "min_clearance_m": 4.76,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 16.05,
+          "first_seen_s": 5.475,
+          "first_brake_s": 7.5,
+          "min_clearance_m": 4.103,
+          "hard_brakes": 1
+        }
+      }
+    ],
+    "rounds": [
+      {
+        "first_test": 1,
+        "last_test": 6,
+        "hypothesis": "Built-in coverage search; no AI model used.",
+        "usage": {}
+      },
+      {
+        "first_test": 7,
+        "last_test": 12,
+        "hypothesis": "Built-in coverage search; no AI model used.",
+        "usage": {}
+      }
+    ],
+    "unique_scenarios": 12,
+    "note": "AI hypotheses are proposals, not causal evidence. Measurements come from the simulator. Saved scenarios replay deterministically; live model proposals may vary."
+  },
+  "systematic": {
+    "version": "blindspot-0.1",
+    "mode": "systematic",
+    "seed": 17,
+    "budget": 12,
+    "concern": "Investigate hidden pedestrians near a crosswalk",
+    "model": null,
+    "elapsed_s": 0.03,
+    "summary": {
+      "reactive": {
+        "tests": 12,
+        "collisions": 0,
+        "completed": 12,
+        "first_failure_test": null,
+        "mean_completion_s": 8.14
+      },
+      "cautious": {
+        "tests": 12,
+        "collisions": 0,
+        "completed": 12,
+        "first_failure_test": null,
+        "mean_completion_s": 10.94
+      }
+    },
+    "rows": [
+      {
+        "index": 1,
+        "id": "f3d11b7fee",
+        "scenario": {
+          "speed_kmh": 40.0,
+          "van_gap": 4.667,
+          "emerge_s": 1.2,
+          "ped_speed": 1.043,
+          "reaction_s": 0.091,
+          "brake_mps2": 3.462,
+          "pedestrian": false
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 5.15,
+          "first_seen_s": null,
+          "first_brake_s": null,
+          "min_clearance_m": null,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 11.5,
+          "first_seen_s": null,
+          "first_brake_s": 1.25,
+          "min_clearance_m": null,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 2,
+        "id": "0365d2c650",
+        "scenario": {
+          "speed_kmh": 27.5,
+          "van_gap": 8.333,
+          "emerge_s": 2.4,
+          "ped_speed": 1.286,
+          "reaction_s": 0.182,
+          "brake_mps2": 3.923,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 12.425,
+          "first_seen_s": 3.4,
+          "first_brake_s": 3.775,
+          "min_clearance_m": 3.051,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 14.0,
+          "first_seen_s": 3.55,
+          "first_brake_s": 2.225,
+          "min_clearance_m": 3.893,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 3,
+        "id": "a552cb3a8b",
+        "scenario": {
+          "speed_kmh": 52.5,
+          "van_gap": 2.222,
+          "emerge_s": 3.6,
+          "ped_speed": 1.529,
+          "reaction_s": 0.273,
+          "brake_mps2": 4.385,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.925,
+          "first_seen_s": 2.7,
+          "first_brake_s": null,
+          "min_clearance_m": 4.4,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 5.975,
+          "first_seen_s": 3.2,
+          "first_brake_s": 1.15,
+          "min_clearance_m": 2.743,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 4,
+        "id": "e95871c270",
+        "scenario": {
+          "speed_kmh": 21.25,
+          "van_gap": 5.889,
+          "emerge_s": 4.8,
+          "ped_speed": 1.771,
+          "reaction_s": 0.364,
+          "brake_mps2": 4.846,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 13.7,
+          "first_seen_s": 5.375,
+          "first_brake_s": 5.75,
+          "min_clearance_m": 3.925,
+          "hard_brakes": 2
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 15.35,
+          "first_seen_s": 5.55,
+          "first_brake_s": 4.525,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 5,
+        "id": "96a0146a85",
+        "scenario": {
+          "speed_kmh": 46.25,
+          "van_gap": 9.556,
+          "emerge_s": 0.24,
+          "ped_speed": 2.014,
+          "reaction_s": 0.455,
+          "brake_mps2": 5.308,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 8.25,
+          "first_seen_s": 1.325,
+          "first_brake_s": 1.8,
+          "min_clearance_m": 4.016,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 10.525,
+          "first_seen_s": 1.325,
+          "first_brake_s": 1.475,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 6,
+        "id": "36e8c0a830",
+        "scenario": {
+          "speed_kmh": 33.75,
+          "van_gap": 3.444,
+          "emerge_s": 1.44,
+          "ped_speed": 2.257,
+          "reaction_s": 0.545,
+          "brake_mps2": 5.769,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 9.375,
+          "first_seen_s": 2.725,
+          "first_brake_s": 3.275,
+          "min_clearance_m": 4.377,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 12.55,
+          "first_seen_s": 2.725,
+          "first_brake_s": 2.15,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 7,
+        "id": "03ab86803e",
+        "scenario": {
+          "speed_kmh": 58.75,
+          "van_gap": 7.111,
+          "emerge_s": 2.64,
+          "ped_speed": 0.835,
+          "reaction_s": 0.636,
+          "brake_mps2": 6.231,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.5,
+          "first_seen_s": 1.925,
+          "first_brake_s": null,
+          "min_clearance_m": 4.175,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 4.25,
+          "first_seen_s": 1.95,
+          "first_brake_s": 1.425,
+          "min_clearance_m": 3.861,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 8,
+        "id": "4fbbbcf5c7",
+        "scenario": {
+          "speed_kmh": 18.125,
+          "van_gap": 10.778,
+          "emerge_s": 3.84,
+          "ped_speed": 1.078,
+          "reaction_s": 0.727,
+          "brake_mps2": 6.692,
+          "pedestrian": false
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 11.325,
+          "first_seen_s": null,
+          "first_brake_s": null,
+          "min_clearance_m": null,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 14.875,
+          "first_seen_s": null,
+          "first_brake_s": 6.375,
+          "min_clearance_m": null,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 9,
+        "id": "3bd4a1db49",
+        "scenario": {
+          "speed_kmh": 43.125,
+          "van_gap": 1.407,
+          "emerge_s": 5.04,
+          "ped_speed": 1.32,
+          "reaction_s": 0.818,
+          "brake_mps2": 7.154,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 4.775,
+          "first_seen_s": 3.4,
+          "first_brake_s": null,
+          "min_clearance_m": 4.4,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 8.95,
+          "first_seen_s": 4.1,
+          "first_brake_s": 1.9,
+          "min_clearance_m": 1.38,
+          "hard_brakes": 0
+        }
+      },
+      {
+        "index": 10,
+        "id": "cd1d7c63ff",
+        "scenario": {
+          "speed_kmh": 30.625,
+          "van_gap": 5.074,
+          "emerge_s": 0.48,
+          "ped_speed": 1.563,
+          "reaction_s": 0.909,
+          "brake_mps2": 7.615,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 10.375,
+          "first_seen_s": 2.275,
+          "first_brake_s": 3.725,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 12.2,
+          "first_seen_s": 2.275,
+          "first_brake_s": 3.475,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 11,
+        "id": "913b846998",
+        "scenario": {
+          "speed_kmh": 55.625,
+          "van_gap": 8.741,
+          "emerge_s": 1.68,
+          "ped_speed": 1.806,
+          "reaction_s": 0.008,
+          "brake_mps2": 8.077,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 3.7,
+          "first_seen_s": 1.825,
+          "first_brake_s": null,
+          "min_clearance_m": 1.884,
+          "hard_brakes": 0
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 9.35,
+          "first_seen_s": 1.925,
+          "first_brake_s": 0.85,
+          "min_clearance_m": 0.006,
+          "hard_brakes": 1
+        }
+      },
+      {
+        "index": 12,
+        "id": "5b870f24f3",
+        "scenario": {
+          "speed_kmh": 24.375,
+          "van_gap": 2.63,
+          "emerge_s": 2.88,
+          "ped_speed": 2.049,
+          "reaction_s": 0.099,
+          "brake_mps2": 8.538,
+          "pedestrian": true
+        },
+        "reactive": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 11.125,
+          "first_seen_s": 4.3,
+          "first_brake_s": 4.95,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        },
+        "cautious": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 11.8,
+          "first_seen_s": 4.3,
+          "first_brake_s": 4.025,
+          "min_clearance_m": 4.8,
+          "hard_brakes": 1
+        }
+      }
+    ],
+    "rounds": [
+      {
+        "first_test": 1,
+        "last_test": 6,
+        "hypothesis": "Built-in coverage search; no AI model used.",
+        "usage": {}
+      },
+      {
+        "first_test": 7,
+        "last_test": 12,
+        "hypothesis": "Built-in coverage search; no AI model used.",
+        "usage": {}
+      }
+    ],
+    "unique_scenarios": 12,
+    "note": "AI hypotheses are proposals, not causal evidence. Measurements come from the simulator. Saved scenarios replay deterministically; live model proposals may vary."
+  },
+  "status": "success",
+  "cumulative_conservative_reserved_usd": 0.461
+}

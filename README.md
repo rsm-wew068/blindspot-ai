@@ -4,7 +4,7 @@ A working local prototype for investigating autonomous-driving controller failur
 
 ## Project status
 
-The local simulator, controller comparisons, built-in searches, replay, and evidence export work without an API key. NVIDIA Nemotron integration is implemented but live verification is pending Nebius access approval. No AI search advantage or real-world safety performance is claimed.
+The local simulator, controller comparisons, built-in searches, replay, and evidence export work without an API key. NVIDIA Nemotron integration passed a live two-round, 12-scenario smoke test on 26 September 2026. This small trial does not establish a general AI search advantage or real-world safety performance.
 
 See [verification results](VALIDATION.md) and the reproducible JSON cases in [examples](examples/).
 
@@ -39,7 +39,7 @@ The adapter uses the official Nebius Token Factory endpoint `https://api.tokenfa
 
 Choose **NVIDIA Nemotron · live AI** and start an investigation. The model proposes batches of up to six bounded scenarios, receives measured outcomes from both controllers, and proposes the next batch. Numeric validation rejects unknown fields, out-of-range values, and non-finite numbers. Model output is data, never executable code. Token usage reported by the provider is saved per round.
 
-Live runs send your concern and synthetic simulation measurements to Nebius and consume account credits. Up to eight proposal calls are allowed per run, with 45-second timeouts per request. This is real inference only when connected: absent credentials or failed requests produce an explicit error, never simulated AI output. The integration has been tested with mocked provider responses, but live inference still requires a real account and key.
+Live runs send your concern and synthetic simulation measurements to Nebius and consume account credits. Up to eight proposal calls are allowed per run, with 45-second timeouts per request. This is real inference only when connected: absent credentials or failed requests produce an explicit error, never simulated AI output. The integration has been tested with mocked provider responses and a live NVIDIA Nemotron Nano smoke test. Your own account and key are required for live inference. Requests use a strict JSON schema, and local validation remains mandatory.
 
 ## Physics and sensing assumptions
 
@@ -59,7 +59,11 @@ Random and systematic search are functioning non-AI baselines. The systematic ba
 
 The independent evaluation suite uses seed 90210 and 24 scenarios, excluded from the search agent's context. Once used to tune a controller, replace it with a fresh suite before reporting held-out performance. It is not a public benchmark or evidence of road safety.
 
-The current prototype implements local one-variable counterfactuals. It does not yet implement global failure minimization, arbitrary user controller uploads, learned vehicle control, photorealistic simulation, cloud batch execution, or a validated AI-versus-search benchmark. Live Nebius inference and cloud deployment remain to be verified. This is not yet a complete hackathon submission.
+The current prototype implements local one-variable counterfactuals. It does not yet implement global failure minimization, arbitrary user controller uploads, learned vehicle control, photorealistic simulation, cloud batch execution, or a validated AI-versus-search benchmark. Live Nebius inference has been smoke-tested; cloud deployment remains unverified. This is not yet a complete hackathon submission.
+
+## Deploy
+
+See [hosting setup](DEPLOYMENT.md) for the Render free preview and live-AI setup.
 
 ## Verify
 

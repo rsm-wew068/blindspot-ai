@@ -1,0 +1,9 @@
+*
+!Dockerfile
+!requirements.txt
+!hosted.py
+!server.py
+!investigation.py
+!simulation.py
+!static/
+!static/**

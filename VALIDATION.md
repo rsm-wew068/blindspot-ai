@@ -25,4 +25,23 @@ The JSON artifacts in examples/ contain the scenario inputs, controller measurem
 
 ## Not yet verified
 
-Live Nemotron inference, account-specific model availability, an AI advantage over the non-AI searches, mobile browser interaction, cloud deployment, or physical-world behavior. The current input comparisons are local interventions, not global failure minimization. External controller ingestion and a complete hackathon submission are future work.
+A general AI advantage over the non-AI searches, mobile browser interaction, cloud deployment, or physical-world behavior remain unverified. Live inference and account-specific model availability were verified in the update below. The current input comparisons are local interventions, not global failure minimization. External controller ingestion and a complete hackathon submission are future work.
+
+
+## Live integration update — 26 September 2026
+
+NVIDIA Nemotron Nano (`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`) completed a live two-round investigation through Nebius Token Factory. The second round received the first round's measured outcomes. The initial prompt-only trial failed second-round input validation; strict schema output was then added. A schema-envelope attempt was rejected with HTTP 422 before the corrected envelope succeeded. There are now 16 passing automated tests, including complete-schema and null-output rejection checks.
+
+| Method | Scenarios | Reactive collisions | Occlusion-aware collisions |
+|---|---:|---:|---:|
+| Live AI | 12 | 7 | 2 |
+| Random, seed 17 | 12 | 1 | 0 |
+| Systematic | 12 | 0 | 0 |
+
+These are collision-containing test counts, not a claim that the AI is safer or that its search is generally superior. All methods executed both controllers per scenario. The study needs multiple model runs and random seeds before making comparative claims. The smoke-test artifact is `examples/live-smoke-20260926.json`.
+
+Across the four completed inference requests (including the discarded initial trial), provider-reported usage totaled 5,241 input tokens and 7,179 output tokens, or 12,420 total tokens. One additional request was rejected with HTTP 422 and had no reported token usage. The one-off experiment reserved $0.461 against its $1 allowance using a deliberately conservative assumed rate of $10 per million tokens and pre-request token bounds. This is not an invoice or a verified account billing rate, and it does not configure an account-wide or app-wide spending cap. No additional paid experiments were run after the successful trial.
+
+## Hosting preparation — 5 October 2026
+
+All 25 automated tests pass, including hosted authentication, origin checks, AI allowance persistence, disabled-AI behavior, and export handling. Render origin configuration is covered. JavaScript syntax and Git whitespace checks pass. The container image and public Render endpoint still require deployment verification.
