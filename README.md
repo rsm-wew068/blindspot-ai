@@ -94,3 +94,7 @@ This recomputes both controllers, compares recorded measurements when available,
 - [Official NVIDIA Nemotron model catalog](https://github.com/nebius/token-factory-cookbook/tree/main/models/nemotron)
 
 MIT licensed. The local demo is not affiliated with or endorsed by NVIDIA, Nebius, or an autonomous-vehicle company.
+
+## Evidence audit
+
+See [the offline benchmark report](BENCHMARK.md) for the historical AI batch versus 100 seeds of random search and a pedestrian-only random baseline. Reproduce with `python3 benchmark.py`; it makes no network or model calls. Replay the remaining shared failure with `python3 replay.py examples/regressions/both-controllers-fail.json`. This is preliminary evidence from one AI run and internal controllers, not a validated general advantage.

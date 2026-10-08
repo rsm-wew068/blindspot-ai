@@ -1,0 +1,100 @@
+{
+  "version": "blindspot-0.1",
+  "scenario": {
+    "speed_kmh": 53.0,
+    "van_gap": 1.1,
+    "emerge_s": 0.4,
+    "ped_speed": 2.2,
+    "reaction_s": 0.2,
+    "brake_mps2": 3.0,
+    "pedestrian": true
+  },
+  "results": {
+    "reactive": {
+      "id": "7226e0ec08",
+      "version": "blindspot-0.1",
+      "scenario": {
+        "speed_kmh": 53.0,
+        "van_gap": 1.1,
+        "emerge_s": 0.4,
+        "ped_speed": 2.2,
+        "reaction_s": 0.2,
+        "brake_mps2": 3.0,
+        "pedestrian": true
+      },
+      "policy": "reactive",
+      "frames": [],
+      "events": [
+        {
+          "t": 0.0,
+          "kind": "visible",
+          "text": "Pedestrian first visible to controller"
+        },
+        {
+          "t": 2.075,
+          "kind": "brake",
+          "text": "Visible pedestrian conflicts with the vehicle path"
+        },
+        {
+          "t": 3.0,
+          "kind": "collision",
+          "text": "Collision detected"
+        }
+      ],
+      "metrics": {
+        "collision": true,
+        "finished": false,
+        "impact_kmh": 43.01,
+        "duration_s": 3.0,
+        "first_seen_s": 0.0,
+        "first_brake_s": 2.075,
+        "min_clearance_m": 0,
+        "hard_brakes": 0
+      }
+    },
+    "cautious": {
+      "id": "7226e0ec08",
+      "version": "blindspot-0.1",
+      "scenario": {
+        "speed_kmh": 53.0,
+        "van_gap": 1.1,
+        "emerge_s": 0.4,
+        "ped_speed": 2.2,
+        "reaction_s": 0.2,
+        "brake_mps2": 3.0,
+        "pedestrian": true
+      },
+      "policy": "cautious",
+      "frames": [],
+      "events": [
+        {
+          "t": 0.0,
+          "kind": "visible",
+          "text": "Pedestrian first visible to controller"
+        },
+        {
+          "t": 1.075,
+          "kind": "brake",
+          "text": "Slow for the obstructed crosswalk"
+        },
+        {
+          "t": 3.5,
+          "kind": "collision",
+          "text": "Collision detected"
+        }
+      ],
+      "metrics": {
+        "collision": true,
+        "finished": false,
+        "impact_kmh": 26.81,
+        "duration_s": 3.5,
+        "first_seen_s": 0.0,
+        "first_brake_s": 1.075,
+        "min_clearance_m": 0,
+        "hard_brakes": 0
+      }
+    }
+  },
+  "source": "live-smoke-20260926.json",
+  "note": "Previously inspected regression case, not held-out evidence or a new controller repair."
+}
