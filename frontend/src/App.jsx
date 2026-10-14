@@ -29,6 +29,7 @@ export default function App() {
   const [draft, setDraft] = useState(DEFAULTS),
     [pair, setPair] = useState(null),
     [dirty, setDirty] = useState(false),
+    [replaySource, setReplaySource] = useState("Manual crosswalk scenario"),
     [simulating, setSimulating] = useState(false);
   const [policy, setPolicy] = useState("reactive"),
     [time, setTime] = useState(0),
@@ -81,19 +82,23 @@ export default function App() {
     };
   }, []);
   const simulate = useCallback(
-    async (s, auto = false) => {
+    async (s, auto = false, source = "Manual crosswalk scenario", preferredPolicy = null) => {
       const seq = ++sequence.current;
       setSimulating(true);
       try {
         const result = await request("/api/simulate", { scenario: s });
         if (seq !== sequence.current || !active.current) return;
         setPair(result);
+        setReplaySource(source);
+        if (preferredPolicy) setPolicy(preferredPolicy);
         setDraft(result.reactive.scenario);
         setDirty(false);
         setTime(0);
         setPlaying(auto);
+        return true;
       } catch (e) {
         if (seq === sequence.current && active.current) notify(e.message, true);
+        return false;
       } finally {
         if (seq === sequence.current && active.current) setSimulating(false);
       }
@@ -181,16 +186,24 @@ export default function App() {
             const next = [state.result, ...current].slice(0, 8);
             return next;
           });
-          setProgress(
-            `Completed ${state.result.budget} tests. Open a case in the notebook below.`,
-          );
-          notebookRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          notify(
-            "Investigation complete. Results are calculated, not generated.",
-          );
+          if (selected === "ai") {
+            const rows = state.result.rows;
+            const chosen = rows.find((row) => row.reactive.collision || row.cautious.collision) || rows[0];
+            const chosenPolicy = chosen?.reactive.collision ? "reactive"
+              : chosen?.cautious.collision ? "cautious" : "reactive";
+            setProgress("Investigation complete. Loading an AI-generated case into the replay…");
+            const loaded = chosen && await simulate(chosen.scenario, true,
+              `Live AI · case ${chosen.index} of ${rows.length} · ${chosen.reactive.collision || chosen.cautious.collision ? "first collision found" : "first generated case; no collisions found"}`,
+              chosenPolicy);
+            setProgress(loaded
+              ? `Completed ${state.result.budget} tests. Replaying AI case ${chosen.index}; explore the other cases in the notebook.`
+              : "Investigation saved. Replay could not load; try opening a case from the notebook.");
+            if (loaded) document.getElementById("replaySection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          } else {
+            setProgress(`Completed ${state.result.budget} tests. Open a case in the notebook below.`);
+            notebookRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          notify("Investigation complete. Results are calculated by the simulator.");
           break;
         }
         setProgress(
@@ -235,7 +248,7 @@ export default function App() {
   const methodHelp =
     mode === "ai"
       ? connection.configured
-        ? "Live AI selected. Click Start AI investigation to generate crosswalk tests using your concern. Uses API credits; open a result in the notebook to change the replay."
+        ? "Live AI selected. Click Start AI investigation to generate crosswalk tests using your concern. Uses API credits; a generated case automatically plays in the replay when the run finishes."
         : aiUnavailable
       : mode === "systematic"
         ? "Fixed low-discrepancy coverage across all ranges. No model calls; includes pedestrian-free controls."
@@ -456,7 +469,8 @@ export default function App() {
               Reset parameters
             </button>
           </aside>
-          <section className="center">
+          <section className="center" id="replaySection">
+            <p className="field-help" role="status" id="replaySource">{replaySource}{dirty ? " · unapplied parameter changes" : ""}</p>
             <Replay
               pair={pair}
               policy={policy}
@@ -615,7 +629,7 @@ export default function App() {
             runs={runs}
             download={download}
             load={(s) => {
-              simulate(s);
+              simulate(s, false, "Saved investigation case");
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           />
