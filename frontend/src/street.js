@@ -68,11 +68,26 @@ export function createStreet(canvas) {
     box(scene, 40, 0.08, z, 240, 0.22, 3.8, "#c5c7be");
     box(scene, 40, 0.13, Math.sign(z) * 5.3, 240, 0.3, 0.18, "#e2ded2");
   }
-  for (let x = -60; x < 155; x += 7) {
-    box(scene, x, 0.023, 1.9, 3, 0.012, 0.11, "#e8dfb0");
+  // One-way travel lane, centered on the simulated ego path, with parking on both sides.
+  // Solid white edges stop at the crosswalk. No misleading yellow lane divider.
+  for (const z of [-1.8, 1.8]) {
+    box(scene, -8.5, 0.025, z, 103, 0.012, 0.10, '#dce0d7');
+    box(scene, 103.5, 0.025, z, 113, 0.012, 0.10, '#dce0d7');
   }
-  for (const z of [-4.8, 4.8])
-    box(scene, 40, 0.022, z, 240, 0.01, 0.1, "#d3d8d2");
+  function parkingBay(parent, x, z, length = 6.4) {
+    for (const side of [-1, 1]) {
+      box(parent, x + side * length / 2, 0.031, z, .10, .016, 2.9, '#c8d0cd');
+    }
+    box(parent, x, .031, z - Math.sign(z) * 1.45, length, .016, .10, '#c8d0cd');
+  }
+  // Repeated forward arrows make the single travel direction explicit.
+  for (const x of [-10, 12, 31, 63, 88]) {
+    box(scene, x, .033, 0, 2, .015, .18, '#e1e5dc');
+    for (const sign of [-1, 1]) {
+      const tip = box(scene, x + .6, .033, sign * .3, 1.1, .015, .14, '#e1e5dc');
+      tip.rotation.y = sign * Math.PI / 5;
+    }
+  }
   for (let z = -4.4; z < 4.8; z += 0.9)
     box(scene, 45, 0.035, z, 4, 0.02, 0.46, "#eae9da");
   box(scene, 40.8, 0.03, -0.1, 0.22, 0.02, 3.4, "#efeee2");
@@ -235,9 +250,13 @@ export function createStreet(canvas) {
   for (let i = 0; i < 6; i++) {
     if (Math.abs(-20 + i * 22 - 45) < 12) continue;
     const parked = vehicle(false, ["#607b80", "#8d7065", "#879077"][i % 3]);
-    parked.position.set(-20 + i * 22, 0, 4);
-    parked.rotation.y = Math.PI;
+    const x = -20 + i * 22;
+    parked.position.set(x, 0, 3.55);
+    parkingBay(scene, x, 3.55);
   }
+  const vanBay = new THREE.Group();
+  parkingBay(vanBay, 0, -3.5, 5.8);
+  scene.add(vanBay);
   const impactRing = new THREE.Mesh(
     new THREE.RingGeometry(0.65, 0.95, 48),
     new THREE.MeshBasicMaterial({color:'#f28b58', side:THREE.DoubleSide, transparent:true, opacity:0.9, depthWrite:false}),
@@ -296,6 +315,7 @@ export function createStreet(canvas) {
     ego.visible = mode !== "driver";
     ego.userData.brake.emissiveIntensity = frame.a < -0.1 ? 3 : 0.15;
     van.position.set(45 - s.van_gap - 2.5, 0, -3.5);
+    vanBay.position.x = van.position.x;
     person.visible = frame.ped_y !== null;
     if (person.visible) {
       person.position.set(45, 0, -frame.ped_y);

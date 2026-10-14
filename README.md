@@ -73,9 +73,9 @@ The current prototype implements local one-variable counterfactuals. It does not
 
 Three.js 0.169.0 is pinned through npm and bundled locally by Vite under its MIT license. It loads as a separate chunk when the replay mounts. Chase, driver, and bird’s-eye cameras display the same recorded positions as the 2D map; switching controllers preserves replay time (clamped to the selected run’s end). The optional hidden-area overlay projects the van’s ground-plane occlusion from the simulated vehicle-front sensor. The HUD reports the simulator’s visibility flag, speed, braking and outcome.
 
-Collision replays show a non-graphic impact marker, a brief edge pulse (disabled with reduced-motion preferences), and measured impact speed. Enable **Impact sound** for a short synthesized thud during playback; sound is off by default and stays silent when scrubbing or switching controllers.
+Collision replays show a non-graphic impact marker, a brief edge pulse (disabled with reduced-motion preferences), and measured impact speed. Use **Test sound** to enable audio and preview the synthesized impact; **Impact sound** controls collision audio during playback; sound is off by default and stays silent when scrubbing or switching controllers.
 
-The street is original procedural geometry. Buildings, trees, lights and background parked vehicles are decorative and do not enter the physics or sensing model. This is a stylized 3D visualization of a 2D simulation, not camera-based perception or a full 3D driving simulator. WebGL failure falls back to the existing 2D replay. No new API calls or keys are needed for graphics.
+The street is original procedural geometry with a single forward travel lane and marked curbside parking bays. Stationary background cars are intentionally parked scenery; only the test vehicle and pedestrian are simulated actors. Buildings, trees, lights and background parked vehicles are decorative and do not enter the physics or sensing model. This is a stylized 3D visualization of a 2D simulation, not camera-based perception or a full 3D driving simulator. WebGL failure falls back to the existing 2D replay. No new API calls or keys are needed for graphics.
 
 ## Deploy
 

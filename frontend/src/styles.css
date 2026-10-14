@@ -1298,3 +1298,5 @@ code {
 @keyframes impact-arrival { from { box-shadow:inset 0 0 100px 25px #e88768b0; } to { box-shadow:inset 0 0 55px 9px #dc6a4c85; } }
 @media (prefers-reduced-motion: reduce) { .impact-vignette { animation:none; } }
 @media(max-width:700px) { .impact-label { bottom:154px; padding:10px 12px; } }
+
+.street-note { margin:0; padding:0 18px 12px; font-size:10px; color:#788078; }

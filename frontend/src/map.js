@@ -59,19 +59,19 @@ export function drawMap(canvas, frame, s, collision) {
     rounded(22, 58, Math.max(40, w * 0.4), 42, 6, "#e2e8d7");
     rounded(w * 0.68, 58, w * 0.25, 42, 6, "#e2e8d7");
     ctx.fillStyle = "#d0d8c7";
-    ctx.fillRect(0, Y(2.25), w, 7.5 * sy);
+    ctx.fillRect(0, Y(5.6), w, 11.2 * sy);
     ctx.fillStyle = "#879180";
-    ctx.fillRect(0, Y(1.75), w, 6.6 * sy);
+    ctx.fillRect(0, Y(5.2), w, 10.4 * sy);
     ctx.strokeStyle = "#d0d7c6";
     ctx.lineWidth = 1;
-    ctx.setLineDash([17, 17]);
-    ctx.beginPath();
-    ctx.moveTo(0, Y(-1.6));
-    ctx.lineTo(w, Y(-1.6));
-    ctx.stroke();
-    ctx.setLineDash([]);
+    for (const edge of [-1.8, 1.8]) {
+      ctx.beginPath();
+      ctx.moveTo(0, Y(edge)); ctx.lineTo(X(43), Y(edge));
+      ctx.moveTo(X(47), Y(edge)); ctx.lineTo(w, Y(edge));
+      ctx.stroke();
+    }
     // Pedestrian crossing markings.
-    for (let yy = -4.4; yy < 1.8; yy += 0.9) {
+    for (let yy = -4.4; yy < 4.8; yy += 0.9) {
       ctx.fillStyle = "#dbe1d1";
       ctx.fillRect(X(43), Y(yy), 4 * sx, 0.47 * sy);
     }

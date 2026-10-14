@@ -59,3 +59,5 @@ The multi-stage Docker image built successfully and passed a local container smo
 ## Collision feedback
 
 Collision playback displays a non-graphic impact marker, edge pulse, and measured impact speed. Optional synthesized audio triggers only on forward playback into a collision. All 30 Python tests and three JavaScript tests pass. Browser checks verified one sound per collision, mute, silence when scrubbing during playback or switching cameras, no impact cue for a completed non-collision run, and reduced-motion support. No model calls were made.
+
+Audio feedback was revised with a higher-frequency impact and contact noise for small speakers, a Test sound preview, and gesture-based audio resumption. The 3D street now uses solid lane edges, forward arrows and explicit parking bays; the 2D view uses matching lane edges. Browser checks cover sound preview and one-shot/mute/scrubbing behavior. Actual audibility still depends on device volume and browser/site sound settings.

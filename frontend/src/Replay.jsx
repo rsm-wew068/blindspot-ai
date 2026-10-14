@@ -32,18 +32,26 @@ export default function Replay({
   const [sound, setSound] = useState(false);
   const audio = useRef(null), previous = useRef(null), playbackImpact = useRef(false);
   useEffect(() => () => { audio.current?.close(); audio.current = null; }, []);
-  async function enableSound(enabled) {
+  async function enableSound(enabled, preview = false) {
     setSound(enabled);
     if (!enabled) return;
     try {
       if (!audio.current) audio.current = createImpactAudio();
       if (!audio.current) throw Error('Audio unavailable');
       await audio.current.resume();
+      if (preview) audio.current.play();
     } catch {
       setSound(false);
       notify('Sound is unavailable in this browser. Visual impact cues remain enabled.');
     }
   }
+  useEffect(() => {
+    if (!sound) return;
+    const unlock = () => { audio.current?.resume().catch(() => {}); };
+    document.addEventListener('pointerdown', unlock);
+    document.addEventListener('keydown', unlock);
+    return () => { document.removeEventListener('pointerdown', unlock); document.removeEventListener('keydown', unlock); };
+  }, [sound]);
   const run = pair?.[policy],
     duration = run?.metrics.duration_s || 0;
   const frame = run ? frameAt(run.frames, time) : null,
@@ -52,7 +60,7 @@ export default function Replay({
   useEffect(() => {
     const current = {run, time, playing, duration, collision, fromPlayback: playbackImpact.current};
     playbackImpact.current = false;
-    if (sound && enteredCollision(previous.current, current)) audio.current?.play();
+    if (sound && enteredCollision(previous.current, current)) audio.current?.play() === false && notify('Audio is paused by the browser. Click Test sound to enable it.');
     previous.current = current;
   }, [run, time, playing, duration, collision, sound]);
   latest.current = {
@@ -210,8 +218,10 @@ export default function Replay({
           Hidden area
         </label>
         <label><input id="impactSound" type="checkbox" checked={sound}
-          onChange={e => enableSound(e.target.checked)} /> Impact sound</label>
+          onChange={e => enableSound(e.target.checked)} /> Impact sound {sound ? "on" : "off"}</label>
+        <button id="testImpactSound" className="text-btn" onClick={() => enableSound(true, true)}>Test sound ♪</button>
       </div>
+      <p className="street-note">One-way test lane · curbside cars are parked scenery</p>
       <div
         className={"canvas-wrap" + (use3d ? " street-active" : "")}
         id="sceneWrap"
@@ -274,7 +284,7 @@ export default function Replay({
         </div>
         <div className="scene-bottom">
           <span>
-            <i className="legend-car" /> Vehicle
+            <i className="legend-car" /> Test vehicle
           </span>
           <span>
             <i className="legend-ped" /> Pedestrian

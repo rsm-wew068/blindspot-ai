@@ -13,20 +13,36 @@ export function createImpactAudio() {
   return {
     async resume() { await context.resume(); },
     play() {
-      if (context.state !== 'running') return;
+      if (context.state !== 'running') return false;
       const now = context.currentTime;
       const gain = context.createGain();
-      gain.gain.setValueAtTime(0.16, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.3, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
       gain.connect(context.destination);
       const tone = context.createOscillator();
       tone.type = 'triangle';
-      tone.frequency.setValueAtTime(115, now);
-      tone.frequency.exponentialRampToValueAtTime(38, now + 0.2);
+      tone.frequency.setValueAtTime(260, now);
+      tone.frequency.exponentialRampToValueAtTime(70, now + 0.32);
       tone.connect(gain);
       tone.start(now);
-      tone.stop(now + 0.25);
+      tone.stop(now + 0.4);
       tone.onended = () => { tone.disconnect(); gain.disconnect(); };
+      // Mid-frequency contact noise remains audible on small laptop speakers.
+      const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * 0.18), context.sampleRate);
+      const samples = buffer.getChannelData(0);
+      for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+      const noise = context.createBufferSource();
+      noise.buffer = buffer;
+      const filter = context.createBiquadFilter();
+      filter.type = 'lowpass'; filter.frequency.value = 1800;
+      const noiseGain = context.createGain();
+      noiseGain.gain.setValueAtTime(0.12, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.17);
+      noise.connect(filter); filter.connect(noiseGain); noiseGain.connect(context.destination);
+      noise.start(now);
+      noise.onended = () => { noise.disconnect(); filter.disconnect(); noiseGain.disconnect(); };
+      return true;
     },
     close() { void context.close().catch(() => {}); },
   };
