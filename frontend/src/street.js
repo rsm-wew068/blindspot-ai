@@ -238,6 +238,13 @@ export function createStreet(canvas) {
     parked.position.set(-20 + i * 22, 0, 4);
     parked.rotation.y = Math.PI;
   }
+  const impactRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.65, 0.95, 48),
+    new THREE.MeshBasicMaterial({color:'#f28b58', side:THREE.DoubleSide, transparent:true, opacity:0.9, depthWrite:false}),
+  );
+  impactRing.rotation.x = -Math.PI / 2;
+  impactRing.visible = false;
+  scene.add(impactRing);
   const person = new THREE.Group();
   scene.add(person);
   cylinder(person, 0, 1.05, 0, 0.21, 0.64, "#cf724c");
@@ -283,6 +290,8 @@ export function createStreet(canvas) {
       camera.aspect = rect.width / rect.height;
       camera.updateProjectionMatrix();
     }
+    impactRing.visible = !!collision;
+    impactRing.position.set(45, 0.07, -(frame.ped_y ?? 0));
     ego.position.x = frame.x;
     ego.visible = mode !== "driver";
     ego.userData.brake.emissiveIntensity = frame.a < -0.1 ? 3 : 0.15;

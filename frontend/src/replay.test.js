@@ -23,3 +23,16 @@ test("end of replay is clamped and absent pedestrians remain absent", () => {
     null,
   );
 });
+
+import { enteredCollision } from './impact.js';
+test('impact sound fires only when playback enters a collision, never on scrubbing or switches', () => {
+  const run = {};
+  const before = {run, time:2.9, playing:true};
+  const end = {run, time:3, duration:3, collision:true, fromPlayback:true};
+  assert.equal(enteredCollision(before, end), true);
+  assert.equal(enteredCollision(before, {...end, fromPlayback:false}), false);
+  assert.equal(enteredCollision({...before, playing:false}, end), false);
+  assert.equal(enteredCollision({...before, run:{}}, end), false);
+  assert.equal(enteredCollision({...before, time:3}, end), false);
+  assert.equal(enteredCollision(before, {...end, collision:false}), false);
+});

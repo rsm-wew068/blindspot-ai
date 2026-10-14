@@ -55,3 +55,7 @@ All 25 automated tests pass, including hosted authentication, origin checks, AI 
 The UI now uses React 19 and Vite, with Python/Waitress serving the production build. All 30 Python tests and two JavaScript replay tests pass. Browser checks cover desktop/mobile layouts, all cameras, timeline/controller synchronization, scenario changes, input comparisons, random investigations, notebook persistence, dialogs, and WebGL fallback. A separate Waitress browser check verifies authenticated React/Three.js delivery, JSON downloads, and the disabled-AI flow. No paid model calls were made.
 
 The multi-stage Docker image built successfully and passed a local container smoke test for health, authentication, compiled React assets, and disabled AI. The React deployment on Render has not yet been verified behind its login.
+
+## Collision feedback
+
+Collision playback displays a non-graphic impact marker, edge pulse, and measured impact speed. Optional synthesized audio triggers only on forward playback into a collision. All 30 Python tests and three JavaScript tests pass. Browser checks verified one sound per collision, mute, silence when scrubbing during playback or switching cameras, no impact cue for a completed non-collision run, and reduced-motion support. No model calls were made.

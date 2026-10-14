@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { drawMap } from "./map.js";
+import { createImpactAudio, enteredCollision } from "./impact.js";
 import { frameAt } from "./replay.js";
 const cameras = {
   chase: "Chase",
@@ -28,11 +29,32 @@ export default function Replay({
     view = useRef(null),
     latest = useRef(null),
     paint = useRef(() => {});
+  const [sound, setSound] = useState(false);
+  const audio = useRef(null), previous = useRef(null), playbackImpact = useRef(false);
+  useEffect(() => () => { audio.current?.close(); audio.current = null; }, []);
+  async function enableSound(enabled) {
+    setSound(enabled);
+    if (!enabled) return;
+    try {
+      if (!audio.current) audio.current = createImpactAudio();
+      if (!audio.current) throw Error('Audio unavailable');
+      await audio.current.resume();
+    } catch {
+      setSound(false);
+      notify('Sound is unavailable in this browser. Visual impact cues remain enabled.');
+    }
+  }
   const run = pair?.[policy],
     duration = run?.metrics.duration_s || 0;
   const frame = run ? frameAt(run.frames, time) : null,
     end = !!run && time >= duration,
     collision = end && run.metrics.collision;
+  useEffect(() => {
+    const current = {run, time, playing, duration, collision, fromPlayback: playbackImpact.current};
+    playbackImpact.current = false;
+    if (sound && enteredCollision(previous.current, current)) audio.current?.play();
+    previous.current = current;
+  }, [run, time, playing, duration, collision, sound]);
   latest.current = {
     frame,
     scenario: run?.scenario,
@@ -99,6 +121,7 @@ export default function Replay({
           elapsed + Math.min(0.1, (now - previous) / 1000) * speed,
         );
       previous = now;
+      if (elapsed >= duration) playbackImpact.current = true;
       setTime(elapsed);
       if (elapsed >= duration) {
         setPlaying(false);
@@ -186,6 +209,8 @@ export default function Replay({
           />{" "}
           Hidden area
         </label>
+        <label><input id="impactSound" type="checkbox" checked={sound}
+          onChange={e => enableSound(e.target.checked)} /> Impact sound</label>
       </div>
       <div
         className={"canvas-wrap" + (use3d ? " street-active" : "")}
@@ -203,6 +228,11 @@ export default function Replay({
           hidden={!use3d}
           aria-label="3D street replay of the computed simulation"
         />
+        {collision && <div className="impact-cue" role="status" aria-live="polite">
+          <div className="impact-vignette" />
+          <div className="impact-label"><strong>Collision detected</strong>
+          <span>{run.metrics.impact_kmh?.toFixed(1)} km/h impact · simulation paused</span></div>
+        </div>}
         {frame && (
           <div className="driving-hud" id="drivingHud" hidden={!use3d}>
             <div className="hud-context">
