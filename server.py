@@ -10,6 +10,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
+from frontend_assets import frontend_asset
 from simulation import Scenario, VERSION, compare
 from investigation import connection, counterfactuals, held_out, investigate
 
@@ -75,16 +76,11 @@ class Handler(BaseHTTPRequestHandler):
                 job = JOBS.get(path.rsplit("/", 1)[-1])
                 snapshot = dict(job) if job else None
             return self.send(200 if snapshot else 404, snapshot or {"error": "Run not found."})
-        assets = {"/": ("index.html", "text/html; charset=utf-8"),
-                  "/app.js": ("app.js", "text/javascript; charset=utf-8"),
-                  "/styles.css": ("styles.css", "text/css; charset=utf-8")}
-        assets.update({"/street.js": ("street.js", "text/javascript; charset=utf-8"),
-                       "/vendor/three.module.min.js": ("vendor/three.module.min.js", "text/javascript; charset=utf-8"),
-                       "/vendor/THREE-LICENSE.txt": ("vendor/THREE-LICENSE.txt", "text/plain; charset=utf-8")})
-        if path in assets:
-            name, mime = assets[path]
-            return self.send(200, (ROOT / "static" / name).read_bytes(), mime)
-        return self.send(404, {"error": "Not found."})
+        asset = frontend_asset(path)
+        if asset:
+            body, mime = asset
+            return self.send(200, body, mime)
+        return self.send(404, {"error": "Not found. Build the frontend with npm ci and npm run build in frontend/."})
 
     def do_POST(self):
         origin = self.headers.get("Origin")

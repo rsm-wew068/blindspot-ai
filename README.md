@@ -10,15 +10,23 @@ See [verification results](VALIDATION.md) and the reproducible JSON cases in [ex
 
 ## Run
 
-Requires Python 3.9+ and a modern browser. No third-party Python packages or frontend build step.
+Requires Python 3.9+, Node.js 22.12+ (Node 22 LTS recommended), npm, and a modern browser. The frontend uses React 19, Vite, and Three.js; the backend uses Python, with Waitress in production. API keys remain server-side.
 
 ```sh
 git clone https://github.com/rsm-wew068/blindspot-ai.git
 cd blindspot-ai
+npm ci --prefix frontend
+npm run build --prefix frontend
 python3 server.py
 ```
 
 Open http://127.0.0.1:8765. Use `--port 8766` if the default port is occupied. The server binds only to the local machine. Stop it with Ctrl+C.
+
+### Frontend development
+
+Run `python3 server.py --port 8766` in one terminal and `npm run dev --prefix frontend` in another. Open the Vite URL (normally http://127.0.0.1:5173). The loopback-only dev server proxies `/api` to port 8766. Rebuild with `npm run build --prefix frontend` before using Python's production assets again.
+
+React owns scenario controls, API state, playback, the HUD, dialogs, and the investigation notebook. Canvas and Three.js renderers are attached through refs/effects and disposed on unmount. Source lives in `frontend/src`; generated `frontend/dist` and `node_modules` are ignored by Git.
 
 ## Try the workflow
 
@@ -59,11 +67,11 @@ Random and systematic search are functioning non-AI baselines. The systematic ba
 
 The independent evaluation suite uses seed 90210 and 24 scenarios, excluded from the search agent's context. Once used to tune a controller, replace it with a fresh suite before reporting held-out performance. It is not a public benchmark or evidence of road safety.
 
-The current prototype implements local one-variable counterfactuals. It does not yet implement global failure minimization, arbitrary user controller uploads, learned vehicle control, photorealistic simulation, cloud batch execution, or a validated AI-versus-search benchmark. Live Nebius inference has been smoke-tested; cloud deployment remains unverified. This is not yet a complete hackathon submission.
+The current prototype implements local one-variable counterfactuals. It does not yet implement global failure minimization, arbitrary user controller uploads, learned vehicle control, photorealistic simulation, cloud batch execution, or a validated AI-versus-search benchmark. Live Nebius inference has been smoke-tested; the Render health endpoint has been verified, but authenticated public-demo interaction remains unverified. This is not yet a complete hackathon submission.
 
 ## 3D replay
 
-Three.js 0.169.0 is vendored locally under its MIT license. Chase, driver, and bird’s-eye cameras display the same recorded positions as the 2D map; switching controllers preserves replay time (clamped to the selected run’s end). The optional hidden-area overlay projects the van’s ground-plane occlusion from the simulated vehicle-front sensor. The HUD reports the simulator’s visibility flag, speed, braking and outcome.
+Three.js 0.169.0 is pinned through npm and bundled locally by Vite under its MIT license. It loads as a separate chunk when the replay mounts. Chase, driver, and bird’s-eye cameras display the same recorded positions as the 2D map; switching controllers preserves replay time (clamped to the selected run’s end). The optional hidden-area overlay projects the van’s ground-plane occlusion from the simulated vehicle-front sensor. The HUD reports the simulator’s visibility flag, speed, braking and outcome.
 
 The street is original procedural geometry. Buildings, trees, lights and background parked vehicles are decorative and do not enter the physics or sensing model. This is a stylized 3D visualization of a 2D simulation, not camera-based perception or a full 3D driving simulator. WebGL failure falls back to the existing 2D replay. No new API calls or keys are needed for graphics.
 
@@ -75,6 +83,8 @@ See [hosting setup](DEPLOYMENT.md) for the Render free preview and live-AI setup
 
 ```sh
 python3 -m unittest -v
+npm test --prefix frontend
+npm run build --prefix frontend
 ```
 
 Tests cover observation isolation, visibility geometry, continuous collision detection, analytic cruising time, actuation latency, repeatable replay, bounded physics, paired search outcomes, one-variable interventions, and provider validation/failure paths. Mock provider tests are not live-model evidence.

@@ -1,0 +1,725 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import Replay from "./Replay.jsx";
+import { Comparison, Notebook, Modal, Outcome } from "./components.jsx";
+const DEFAULTS = {
+  speed_kmh: 45,
+  van_gap: 3,
+  emerge_s: 0.8,
+  reaction_s: 0.3,
+  ped_speed: 1.8,
+  brake_mps2: 6,
+  pedestrian: true,
+};
+async function request(path, data, signal) {
+  const res = await fetch(path, {
+    signal,
+    ...(data === undefined
+      ? {}
+      : {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }),
+  });
+  const result = await res.json();
+  if (!res.ok) throw Error(result.error || "Request failed.");
+  return result;
+}
+export default function App() {
+  const [draft, setDraft] = useState(DEFAULTS),
+    [pair, setPair] = useState(null),
+    [dirty, setDirty] = useState(false),
+    [simulating, setSimulating] = useState(false);
+  const [policy, setPolicy] = useState("reactive"),
+    [time, setTime] = useState(0),
+    [playing, setPlaying] = useState(false);
+  const [concern, setConcern] = useState(
+    "A pedestrian steps out from behind a parked van. When does the car brake too late?",
+  );
+  const [connection, setConnection] = useState({}),
+    [hosted, setHosted] = useState(false),
+    [mode, setMode] = useState("random"),
+    [budget, setBudget] = useState(24),
+    [seed, setSeed] = useState("17");
+  const [busy, setBusy] = useState(false),
+    [progress, setProgress] = useState(""),
+    [dialog, setDialog] = useState(null),
+    [counter, setCounter] = useState(null),
+    [inspecting, setInspecting] = useState(false),
+    [message, setMessage] = useState(null);
+  const [runs, setRuns] = useState(() => {
+    try {
+      const r = JSON.parse(localStorage.getItem("blindspot-runs-v1") || "[]");
+      return Array.isArray(r)
+        ? r.filter((x) => x && Array.isArray(x.rows) && x.summary).slice(0, 8)
+        : [];
+    } catch {
+      return [];
+    }
+  });
+  const notebookRef = useRef(null),
+    sequence = useRef(0),
+    toastTimer = useRef(null),
+    runLock = useRef(false),
+    active = useRef(true),
+    poll = useRef(null);
+  const notify = useCallback((text, error = false) => {
+    setMessage({ text, error });
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(
+      () => setMessage(null),
+      error ? 9000 : 4000,
+    );
+  }, []);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+      sequence.current++;
+      poll.current?.abort();
+      clearTimeout(toastTimer.current);
+    };
+  }, []);
+  const simulate = useCallback(
+    async (s, auto = false) => {
+      const seq = ++sequence.current;
+      setSimulating(true);
+      try {
+        const result = await request("/api/simulate", { scenario: s });
+        if (seq !== sequence.current || !active.current) return;
+        setPair(result);
+        setDraft(result.reactive.scenario);
+        setDirty(false);
+        setTime(0);
+        setPlaying(auto);
+      } catch (e) {
+        if (seq === sequence.current && active.current) notify(e.message, true);
+      } finally {
+        if (seq === sequence.current && active.current) setSimulating(false);
+      }
+    },
+    [notify],
+  );
+  useEffect(() => {
+    let cancelled = false;
+    request("/api/status")
+      .then((status) => {
+        if (cancelled) return;
+        setConnection(status.connection);
+        setHosted(status.deployment === "hosted");
+        if (status.deployment === "hosted") setBudget(12);
+      })
+      .catch((e) => {
+        if (!cancelled) notify(e.message, true);
+      });
+    simulate(DEFAULTS);
+    return () => {
+      cancelled = true;
+    };
+  }, [simulate, notify]);
+  function edit(key, value) {
+    setDraft((s) => ({ ...s, [key]: value }));
+    setDirty(true);
+  }
+  async function download(value, name) {
+    try {
+      const r = await request("/api/export", { artifact: value, name });
+      if (r.download) {
+        const url = URL.createObjectURL(
+          new Blob([JSON.stringify(r.download, null, 2)], {
+            type: "application/json",
+          }),
+        );
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        notify("Export downloaded.");
+      } else notify("Saved in BlindSpot: " + r.saved);
+    } catch (e) {
+      notify(e.message, true);
+    }
+  }
+  async function investigate(selected) {
+    if (runLock.current) return;
+    if (selected === "ai" && !connection.configured) {
+      setDialog("connection");
+      return;
+    }
+    const n = Number(seed);
+    if (!Number.isInteger(n) || n < 0 || n > 4294967295) {
+      notify("Enter a whole-number seed from 0 to 4294967295.", true);
+      return;
+    }
+    if (hosted && selected === "ai" && budget > 12) {
+      notify("Hosted AI runs allow at most 12 scenarios.", true);
+      return;
+    }
+    runLock.current = true;
+    setBusy(true);
+    setProgress("Preparing investigation…");
+    const controller = new AbortController();
+    poll.current = controller;
+    try {
+      const job = await request(
+        "/api/investigate",
+        { mode: selected, seed: n, budget, concern },
+        controller.signal,
+      );
+      while (active.current && !controller.signal.aborted) {
+        await new Promise((resolve) => setTimeout(resolve, 650));
+        if (controller.signal.aborted) break;
+        const state = await request(
+          "/api/jobs/" + job.job_id,
+          undefined,
+          controller.signal,
+        );
+        if (state.status === "error") throw Error(state.error);
+        if (state.status === "done") {
+          setRuns((current) => {
+            const next = [state.result, ...current].slice(0, 8);
+            return next;
+          });
+          setProgress(
+            `Completed ${state.result.budget} tests. Open a case in the notebook below.`,
+          );
+          notebookRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          notify(
+            "Investigation complete. Results are calculated, not generated.",
+          );
+          break;
+        }
+        setProgress(
+          `${state.progress.completed || 0} tests complete · ${state.progress.message}`,
+        );
+      }
+    } catch (e) {
+      if (e.name !== "AbortError" && active.current) {
+        setProgress("Investigation stopped. No successful run was recorded.");
+        notify(e.message, true);
+      }
+    } finally {
+      runLock.current = false;
+      if (active.current) setBusy(false);
+    }
+  }
+  useEffect(() => {
+    try {
+      localStorage.setItem("blindspot-runs-v1", JSON.stringify(runs));
+    } catch {
+      notify("Browser storage is full; export the run to keep it.");
+    }
+  }, [runs, notify]);
+  async function inspect() {
+    setInspecting(true);
+    try {
+      const result = await request("/api/counterfactuals", {
+        scenario: pair.reactive.scenario,
+        policy,
+      });
+      setCounter(result);
+      setDialog("counter");
+    } catch (e) {
+      notify(e.message, true);
+    } finally {
+      setInspecting(false);
+    }
+  }
+  const methodHelp =
+    mode === "ai"
+      ? "Live model proposals adapt to previous results. Sends synthetic measurements to Nebius; consumes API credits."
+      : mode === "systematic"
+        ? "Fixed low-discrepancy coverage across all ranges. No model calls; includes pedestrian-free controls."
+        : "A seeded random sample across all parameter ranges. Includes cases without pedestrians.";
+  return (
+    <>
+      <header className="topbar">
+        <a className="brand" href="/" aria-label="BlindSpot home">
+          <span className="brandmark">
+            b<span>•</span>
+          </span>
+          blindspot<span className="brandtag">RESEARCH LAB</span>
+        </a>
+        <nav>
+          <button
+            className="navlink active"
+            id="labNav"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
+            Scenario lab
+          </button>
+          <button
+            className="navlink"
+            id="runsNav"
+            onClick={() =>
+              notebookRef.current.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Investigations <span id="runCount">{runs.length}</span>
+          </button>
+        </nav>
+        <button
+          id="connectionBtn"
+          onClick={() => setDialog("connection")}
+          className="connection"
+        >
+          <span className="dot"></span>
+          <span id="connectionLabel">
+            {connection.configured
+              ? "Nebius key configured"
+              : "Local simulation"}
+          </span>
+          <span>↗</span>
+        </button>
+      </header>
+      <main>
+        <div className="intro">
+          <div>
+            <div className="eyebrow">
+              <span className="tiny-cross">+</span> AUTONOMOUS DRIVING / POLICY
+              EVALUATION
+            </div>
+            <h1>
+              Find the failure.
+              <br />
+              <span>Understand the why.</span>
+            </h1>
+            <p>Explore what happens when the road hides what’s ahead.</p>
+          </div>
+          <div className="intro-note">
+            <span className="note-number">01 /</span>
+            <div>
+              <strong>The obstructed crosswalk</strong>
+              <p>
+                One vehicle. One blind spot.
+                <br />A thousand ways it could unfold.
+              </p>
+              <span className="tag">SIMULATED ENVIRONMENT</span>
+            </div>
+          </div>
+        </div>
+        <div className="workspace">
+          <aside className="panel settings">
+            <div className="panel-title">
+              <h2>Configure the crosswalk</h2>
+              <span className="step">01</span>
+            </div>
+            <label htmlFor="concern" className="field-label">
+              WHAT DO YOU WANT TO INVESTIGATE?
+            </label>
+            <textarea
+              id="concern"
+              maxLength="1000"
+              value={concern}
+              onChange={(e) => setConcern(e.target.value)}
+            />
+            <p className="field-help">
+              Used by the live AI investigator. Built-in searches use the
+              parameter ranges below.
+            </p>
+            <div className="divider"></div>
+            <div className="control">
+              <label htmlFor="speed">
+                Vehicle speed{" "}
+                <output id="speedOut">{draft.speed_kmh} km/h</output>
+              </label>
+              <input
+                id="speed"
+                type="range"
+                min="15"
+                max="65"
+                step="0.0001"
+                value={draft.speed_kmh}
+                onChange={(e) => edit("speed_kmh", Number(e.target.value))}
+              />
+              <div className="range-ends">
+                <span>15 km/h</span>
+                <span>65 km/h</span>
+              </div>
+            </div>
+            <div className="control">
+              <label htmlFor="gap">
+                Van → crosswalk <output id="gapOut">{draft.van_gap} m</output>
+              </label>
+              <input
+                id="gap"
+                type="range"
+                min="1"
+                max="12"
+                step="0.0001"
+                value={draft.van_gap}
+                onChange={(e) => edit("van_gap", Number(e.target.value))}
+              />
+              <div className="range-ends">
+                <span>1 m · obstructed</span>
+                <span>12 m · open</span>
+              </div>
+            </div>
+            <div className="control">
+              <label htmlFor="emerge">
+                Pedestrian starts walking{" "}
+                <output id="emergeOut">{draft.emerge_s} s</output>
+              </label>
+              <input
+                id="emerge"
+                type="range"
+                min="0"
+                max="6"
+                step="0.0001"
+                value={draft.emerge_s}
+                onChange={(e) => edit("emerge_s", Number(e.target.value))}
+              />
+            </div>
+            <div className="control">
+              <label htmlFor="reaction">
+                Braking response delay{" "}
+                <output id="reactionOut">{draft.reaction_s} s</output>
+              </label>
+              <input
+                id="reaction"
+                type="range"
+                min="0"
+                max="1"
+                step="0.0001"
+                value={draft.reaction_s}
+                onChange={(e) => edit("reaction_s", Number(e.target.value))}
+              />
+            </div>
+            <details className="advanced">
+              <summary>
+                More parameters <span>+</span>
+              </summary>
+              <div className="control">
+                <label htmlFor="pedSpeed">
+                  Walking speed{" "}
+                  <output id="pedSpeedOut">{draft.ped_speed} m/s</output>
+                </label>
+                <input
+                  id="pedSpeed"
+                  type="range"
+                  min="0.8"
+                  max="2.5"
+                  step="0.0001"
+                  value={draft.ped_speed}
+                  onChange={(e) => edit("ped_speed", Number(e.target.value))}
+                />
+              </div>
+              <div className="control">
+                <label htmlFor="brake">
+                  Braking strength{" "}
+                  <output id="brakeOut">{draft.brake_mps2} m/s²</output>
+                </label>
+                <input
+                  id="brake"
+                  type="range"
+                  min="3"
+                  max="9"
+                  step="0.0001"
+                  value={draft.brake_mps2}
+                  onChange={(e) => edit("brake_mps2", Number(e.target.value))}
+                />
+              </div>
+              <label className="checkbox">
+                <input
+                  id="pedestrian"
+                  type="checkbox"
+                  checked={draft.pedestrian}
+                  onChange={(e) => edit("pedestrian", e.target.checked)}
+                />{" "}
+                Include pedestrian
+              </label>
+            </details>
+            <button
+              className="primary full"
+              id="simulateBtn"
+              disabled={simulating}
+              onClick={() => simulate(draft, true)}
+            >
+              {dirty ? "Apply & run scenario" : "Run this scenario"}{" "}
+              <span>↗</span>
+            </button>
+            <button
+              className="quiet full"
+              id="resetBtn"
+              onClick={() => simulate(DEFAULTS)}
+            >
+              Reset parameters
+            </button>
+          </aside>
+          <section className="center">
+            <Replay
+              pair={pair}
+              policy={policy}
+              setPolicy={setPolicy}
+              time={time}
+              setTime={setTime}
+              playing={playing}
+              setPlaying={setPlaying}
+              dirty={dirty}
+              notify={notify}
+            />
+            <Comparison pair={pair} inspect={inspect} loading={inspecting} />
+          </section>
+          <aside className="panel investigator">
+            <div className="panel-title">
+              <h2>Find challenging cases</h2>
+              <span className="step">02</span>
+            </div>
+            <div className="agent-orb">
+              <span>✳</span>
+              <div>
+                <strong>Test. Observe. Refine.</strong>
+                <p>
+                  Turn one concern into a set
+                  <br />
+                  of reproducible experiments.
+                </p>
+              </div>
+            </div>
+            <label className="field-label" htmlFor="searchMode">
+              INVESTIGATION METHOD
+            </label>
+            <select
+              id="searchMode"
+              value={mode}
+              disabled={busy}
+              onChange={(e) => setMode(e.target.value)}
+              className="select-full"
+            >
+              <option value="random">Random search · no AI</option>
+              <option value="systematic">Systematic search · no AI</option>
+              <option value="ai">NVIDIA Nemotron · live AI</option>
+            </select>
+            <p className="field-help" id="methodHelp">
+              {methodHelp}
+            </p>
+            <div className="small-fields">
+              <label>
+                Test budget
+                <select
+                  id="budget"
+                  value={budget}
+                  disabled={busy}
+                  onChange={(e) => setBudget(Number(e.target.value))}
+                >
+                  <option value="12">12 scenarios</option>
+                  <option value="24">24 scenarios</option>
+                  <option value="48">48 scenarios</option>
+                </select>
+              </label>
+              <label>
+                Seed
+                <input
+                  id="seed"
+                  type="number"
+                  min="0"
+                  max="4294967295"
+                  step="1"
+                  value={seed}
+                  disabled={busy || mode !== "random"}
+                  onChange={(e) => setSeed(e.target.value)}
+                />
+              </label>
+            </div>
+            <button
+              id="investigateBtn"
+              disabled={busy}
+              onClick={() => investigate(mode)}
+              className="dark full"
+            >
+              Start investigation <span>↗</span>
+            </button>
+            <div
+              id="jobProgress"
+              className="job-progress"
+              hidden={!progress}
+              role="status"
+            >
+              {progress}
+            </div>
+            <div className="divider"></div>
+            <div className="field-label">WHAT YOU’LL GET</div>
+            <ul className="benefits">
+              <li>
+                <span>↗</span> Replayable failure cases
+              </li>
+              <li>
+                <span>↔</span> Both controllers, same tests
+              </li>
+              <li>
+                <span>↓</span> Exportable evidence
+              </li>
+            </ul>
+            <div className="honesty">
+              <span>i</span>
+              <p>
+                <strong>Measured, not staged.</strong> Outcomes come from
+                simulation. Live AI proposes tests; it does not determine the
+                results.
+              </p>
+            </div>
+            <button
+              id="heldoutBtn"
+              disabled={busy}
+              onClick={() => investigate("held-out")}
+              className="quiet full"
+            >
+              Run independent evaluation ↗
+            </button>
+          </aside>
+        </div>
+        <section
+          id="resultsSection"
+          ref={notebookRef}
+          className="results-section"
+        >
+          <div className="section-head">
+            <div>
+              <div className="eyebrow">THE EVIDENCE</div>
+              <h2>Investigation notebook</h2>
+            </div>
+            <button
+              id="exportAllBtn"
+              className="outline"
+              disabled={!pair}
+              onClick={() =>
+                download(
+                  {
+                    version: pair.reactive.version,
+                    scenario: pair.reactive.scenario,
+                    results: pair,
+                  },
+                  "blindspot-" + pair.reactive.id + ".json",
+                )
+              }
+            >
+              Export current case ↓
+            </button>
+          </div>
+          <Notebook
+            runs={runs}
+            download={download}
+            load={(s) => {
+              simulate(s);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
+        </section>
+        <footer>
+          <span>
+            <strong>blindspot</strong> / Experimental policy evaluation
+          </span>
+          <span>
+            3D replay · 2D geometry · 40 Hz physics · simplified sensing · not
+            real-world safety validation
+          </span>
+        </footer>
+      </main>
+      {message && (
+        <div
+          id="toast"
+          className={"toast" + (message.error ? " error" : "")}
+          role="status"
+        >
+          {message.text}
+        </div>
+      )}
+      {dialog === "connection" && (
+        <Modal
+          id="connectionDialog"
+          title="Connect the investigator."
+          eyebrow="NEBIUS TOKEN FACTORY"
+          close={() => setDialog(null)}
+        >
+          <p id="connectionDetail">
+            {connection.configured
+              ? "A key is configured on the server. Live inference is verified when an AI investigation runs."
+              : "The simulator works without live AI."}
+          </p>
+          {hosted ? (
+            <p>
+              Hosting configuration is managed by the project owner. Hosted AI
+              runs have a shared daily allowance.
+            </p>
+          ) : (
+            <ol>
+              <li>Get a Token Factory API key in your Nebius account.</li>
+              <li>
+                Create <code>.env.local</code> beside <code>server.py</code>{" "}
+                with <code>NEBIUS_TOKEN_FACTORY_KEY=your-key</code>.
+              </li>
+              <li>Restart the local server and reload this page.</li>
+            </ol>
+          )}
+          <p>
+            Live AI sends your concern and synthetic test measurements to Nebius
+            and consumes credits. Keys stay on the server. No real driving
+            footage is uploaded.
+          </p>
+          <button
+            className="dark full close-dialog"
+            onClick={() => setDialog(null)}
+          >
+            Got it
+          </button>
+        </Modal>
+      )}
+      {dialog === "counter" && counter && (
+        <Modal
+          id="counterDialog"
+          title="Change one thing."
+          eyebrow="CONTROLLED COMPARISONS"
+          close={() => setDialog(null)}
+        >
+          <p>
+            Each test changes one input. These are measured comparisons, not AI
+            explanations or globally minimal failures.
+          </p>
+          <div id="counterBody">
+            <p>
+              Selected controller: {counter.base.policy}. Original outcome:{" "}
+              {counter.base.metrics.collision ? "collision" : "no collision"}.
+            </p>
+            {counter.interventions.map((v, i) => (
+              <div key={i} className="counter-row">
+                <span>
+                  {
+                    {
+                      speed_kmh: "Speed (km/h)",
+                      reaction_s: "Response delay (s)",
+                      van_gap: "Van gap (m)",
+                      pedestrian: "Pedestrian present",
+                    }[v.change]
+                  }
+                  : {String(v.from)} → {String(v.to)}
+                </span>
+                <Outcome metrics={v.metrics} />
+                <button
+                  className="text-btn"
+                  onClick={() => {
+                    setDialog(null);
+                    simulate(v.scenario, true);
+                  }}
+                >
+                  Replay ↗
+                </button>
+              </div>
+            ))}
+            <button
+              className="outline"
+              onClick={() =>
+                download(counter, "blindspot-input-comparisons.json")
+              }
+            >
+              Export comparisons ↓
+            </button>
+          </div>
+        </Modal>
+      )}
+    </>
+  );
+}

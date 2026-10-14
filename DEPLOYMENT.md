@@ -1,6 +1,6 @@
 # Hosted BlindSpot demo
 
-The Docker image serves the existing simulator through Waitress. No local key files, exports, editor settings, or Git history enter the image. Keep one process and one replica: active jobs are in memory and are lost on restart.
+The multi-stage Docker build compiles React/Vite with Node 22, then copies only the built frontend into the Python/Waitress runtime. Render keeps using the same Docker Blueprint and environment variables. No local key files, exports, editor settings, or Git history enter the image. Keep one process and one replica: active jobs are in memory and are lost on restart.
 
 ## Required setup
 
@@ -22,7 +22,7 @@ The demo password is shared access, not individual accounts. Everyone with the p
 
 ## Local production-server test
 
-Install requirements in a virtual environment, set `BLINDSPOT_PASSWORD` and run `python hosted.py`. Do not use the HTTP localhost endpoint for a remote deployment; terminate HTTPS at the hosting provider.
+Run `npm ci --prefix frontend` and `npm run build --prefix frontend`, install requirements in a virtual environment, set `BLINDSPOT_PASSWORD` and run `python hosted.py`. Do not use the HTTP localhost endpoint for a remote deployment; terminate HTTPS at the hosting provider.
 
 ## Render preview
 
@@ -34,4 +34,4 @@ Free instances sleep after inactivity and do not persist local storage. Before e
 
 ## Deployment status
 
-Configuration prepared and tested locally. The Render service still needs to be created from the signed-in dashboard and its public endpoint verified.
+The Render service is https://blindspot-ai-p9jx.onrender.com. Its health endpoint and authentication challenge were verified before this frontend migration. The React release still needs authenticated verification after Render builds the new commit.

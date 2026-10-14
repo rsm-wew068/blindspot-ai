@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import hosted
+import frontend_assets
+from pathlib import Path
 
 
 class HostedTests(unittest.TestCase):
@@ -13,8 +15,15 @@ class HostedTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.env = patch.dict(os.environ, {'BLINDSPOT_PASSWORD':'test-password-long-enough', 'BLINDSPOT_PUBLIC_ORIGIN':'https://example.test', 'BLINDSPOT_DATA_DIR':self.temp.name}, clear=True)
         self.env.start()
+        self.frontend = Path(self.temp.name) / 'dist'
+        (self.frontend / 'assets').mkdir(parents=True)
+        (self.frontend / 'index.html').write_text('<div id="root"></div>')
+        (self.frontend / 'assets/street-test.js').write_text('export default 1;' * 10)
+        self.assets = patch.object(frontend_assets, 'FRONTEND_ROOT', self.frontend)
+        self.assets.start()
 
     def tearDown(self):
+        self.assets.stop()
         self.env.stop()
         self.temp.cleanup()
 
@@ -31,17 +40,24 @@ class HostedTests(unittest.TestCase):
 
     def test_health_is_public_but_app_and_jobs_are_private(self):
         self.assertTrue(self.call('/healthz',auth=False)[0].startswith('200'))
-        for path in ('/','/app.js','/street.js','/vendor/three.module.min.js','/api/status','/api/jobs/example'):
+        for path in ('/','/assets/street-test.js','/api/status','/api/jobs/example'):
             self.assertTrue(self.call(path,auth=False)[0].startswith('401'))
 
     def test_3d_assets_are_served_with_javascript_mime(self):
-        for path in ('/street.js', '/vendor/three.module.min.js'):
+        for path in ('/assets/street-test.js',):
             status, headers, body = self.call(path)
             self.assertTrue(status.startswith('200'))
             self.assertIn('text/javascript', headers['Content-Type'])
             self.assertGreater(len(body), 100)
         self.assertTrue(self.call('/.env.local')[0].startswith('404'))
-        self.assertTrue(self.call('/vendor/../../.env.local')[0].startswith('404'))
+        self.assertTrue(self.call('/assets/../../.env.local')[0].startswith('404'))
+
+    def test_assets_reject_source_files_and_symlinks(self):
+        secret = Path(self.temp.name) / 'private.js'
+        secret.write_text('not public')
+        (self.frontend / 'assets/link.js').symlink_to(secret)
+        for path in ('/assets/link.js', '/assets/../index.html', '/src/App.jsx', '/package.json'):
+            self.assertTrue(self.call(path)[0].startswith('404'))
 
     def test_missing_password_fails_closed(self):
         os.environ.pop('BLINDSPOT_PASSWORD')

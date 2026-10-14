@@ -6,3 +6,6 @@ exports/
 __pycache__/
 *.pyc
 .DS_Store
+
+frontend/node_modules/
+frontend/dist/

@@ -49,3 +49,9 @@ All 25 automated tests pass, including hosted authentication, origin checks, AI 
 ## 3D replay verification — 5 October 2026
 
 26 Python tests pass, including authenticated delivery of the local Three.js module and rejection of private-file paths. Browser checks passed for camera switches, scrubbing, timestamp preservation across controllers, pedestrian-free replay, mobile layout without horizontal overflow, and the WebGL-context-loss fallback. Desktop and mobile screenshots were inspected; no browser JavaScript errors were observed. Graphics use simulation replay frames; physics is unchanged. No paid inference was performed.
+
+## React migration — 14 October 2026
+
+The UI now uses React 19 and Vite, with Python/Waitress serving the production build. All 30 Python tests and two JavaScript replay tests pass. Browser checks cover desktop/mobile layouts, all cameras, timeline/controller synchronization, scenario changes, input comparisons, random investigations, notebook persistence, dialogs, and WebGL fallback. A separate Waitress browser check verifies authenticated React/Three.js delivery, JSON downloads, and the disabled-AI flow. No paid model calls were made.
+
+The multi-stage Docker image built successfully and passed a local container smoke test for health, authentication, compiled React assets, and disabled AI. The React deployment on Render has not yet been verified behind its login.
