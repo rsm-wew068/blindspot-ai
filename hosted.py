@@ -89,7 +89,8 @@ def application(environ, start_response):
     if method == "GET":
         if path == "/api/status":
             state = connection()
-            state["configured"] = state["configured"] and os.environ.get("BLINDSPOT_ENABLE_AI") == "1"
+            state["enabled"] = os.environ.get("BLINDSPOT_ENABLE_AI") == "1"
+            state["configured"] = state["configured"] and state["enabled"]
             return send(200, {"version": VERSION, "connection":state,"deployment":"hosted"})
         if path.startswith("/api/jobs/"):
             with LOCK:

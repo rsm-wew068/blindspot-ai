@@ -229,9 +229,14 @@ export default function App() {
       setInspecting(false);
     }
   }
+  const aiUnavailable = connection.enabled === false
+    ? "Live AI is disabled on this deployment. The owner must enable it in the server settings."
+    : "Live AI is unavailable. Check the server connection and API key setup.";
   const methodHelp =
     mode === "ai"
-      ? "Live model proposals adapt to previous results. Sends synthetic measurements to Nebius; consumes API credits."
+      ? connection.configured
+        ? "Live AI selected. Click Start AI investigation to generate crosswalk tests using your concern. Uses API credits; open a result in the notebook to change the replay."
+        : aiUnavailable
       : mode === "systematic"
         ? "Fixed low-discrepancy coverage across all ranges. No model calls; includes pedestrian-free controls."
         : "A seeded random sample across all parameter ranges. Includes cases without pedestrians.";
@@ -318,8 +323,9 @@ export default function App() {
               onChange={(e) => setConcern(e.target.value)}
             />
             <p className="field-help">
-              Used by the live AI investigator. Built-in searches use the
-              parameter ranges below.
+              Live AI uses this concern to generate pedestrian-crossing variations.
+              Lane changes, highway exits, and parking are not supported yet.
+              Random and systematic searches do not use this text.
             </p>
             <div className="divider"></div>
             <div className="control">
@@ -487,14 +493,17 @@ export default function App() {
               id="searchMode"
               value={mode}
               disabled={busy}
-              onChange={(e) => setMode(e.target.value)}
+              onChange={(e) => {
+                setMode(e.target.value);
+                if (hosted && e.target.value === "ai") setBudget(12);
+              }}
               className="select-full"
             >
               <option value="random">Random search · no AI</option>
               <option value="systematic">Systematic search · no AI</option>
               <option value="ai">NVIDIA Nemotron · live AI</option>
             </select>
-            <p className="field-help" id="methodHelp">
+            <p className="field-help" id="methodHelp" role="status" aria-live="polite">
               {methodHelp}
             </p>
             <div className="small-fields">
@@ -531,7 +540,9 @@ export default function App() {
               onClick={() => investigate(mode)}
               className="dark full"
             >
-              Start investigation <span>↗</span>
+              {mode === "ai"
+                ? connection.configured ? "Start AI investigation" : "Check AI connection"
+                : "Start investigation"} <span>↗</span>
             </button>
             <div
               id="jobProgress"
@@ -638,7 +649,7 @@ export default function App() {
           <p id="connectionDetail">
             {connection.configured
               ? "A key is configured on the server. Live inference is verified when an AI investigation runs."
-              : "The simulator works without live AI."}
+              : aiUnavailable}
           </p>
           {hosted ? (
             <p>
