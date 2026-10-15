@@ -29,7 +29,7 @@ export default function Replay({
     view = useRef(null),
     latest = useRef(null),
     paint = useRef(() => {});
-  const [sound, setSound] = useState(false);
+  const [sound, setSound] = useState(true);
   const audio = useRef(null), previous = useRef(null), playbackImpact = useRef(false);
   useEffect(() => () => { audio.current?.close(); audio.current = null; }, []);
   async function enableSound(enabled, preview = false) {
@@ -47,7 +47,10 @@ export default function Replay({
   }
   useEffect(() => {
     if (!sound) return;
-    const unlock = () => { audio.current?.resume().catch(() => {}); };
+    const unlock = () => {
+      if (!audio.current) audio.current = createImpactAudio();
+      audio.current?.resume().catch(() => {});
+    };
     document.addEventListener('pointerdown', unlock);
     document.addEventListener('keydown', unlock);
     return () => { document.removeEventListener('pointerdown', unlock); document.removeEventListener('keydown', unlock); };
