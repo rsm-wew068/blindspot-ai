@@ -39,8 +39,8 @@ export default function App() {
   );
   const [connection, setConnection] = useState({}),
     [hosted, setHosted] = useState(false),
-    [mode, setMode] = useState("random"),
-    [budget, setBudget] = useState(24),
+    [mode, setMode] = useState("ai"),
+    [budget, setBudget] = useState(12),
     [seed, setSeed] = useState("17");
   const [busy, setBusy] = useState(false),
     [progress, setProgress] = useState(""),
@@ -336,7 +336,9 @@ export default function App() {
               onChange={(e) => setConcern(e.target.value)}
             />
             <p className="field-help">
-              Live AI uses this concern to generate pedestrian-crossing variations.
+              Describe a pedestrian-crossing concern, then click Start AI investigation.
+              When it finishes, a generated case automatically plays in the replay.
+              Typing alone does not change the scene.
               Lane changes, highway exits, and parking are not supported yet.
               Random and systematic searches do not use this text.
             </p>
