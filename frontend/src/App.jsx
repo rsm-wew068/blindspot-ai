@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import Replay from "./Replay.jsx";
 import "./highway.css";
-const HighwayLab = lazy(() => import("./HighwayLab.jsx"));
+const HighwayReplay = lazy(() => import("./HighwayLab.jsx"));
+const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:115,traffic_kmh:85,speed_variation:23,spacing_m:85,exit_distance_m:950,aggressiveness:.9,traffic_phase:3};
+const HIGHWAY_FIELDS = [["speed_kmh","Target speed",80,130,1,"km/h"],["traffic_kmh","Traffic speed",60,110,1,"km/h"],["speed_variation","Traffic speed variation",0,30,1,"km/h"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",350,1600,10,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
+
 import { Comparison, Notebook, Modal, Outcome } from "./components.jsx";
 const DEFAULTS = {
   speed_kmh: 45,
@@ -29,20 +32,23 @@ async function request(path, data, signal) {
 }
 export default function App() {
   const [scene, setScene] = useState("crosswalk");
-  return <><nav className="scene-switch" aria-label="Simulation scene"><strong>BLINDSPOT · SCENARIO LAB</strong><button aria-pressed={scene === "crosswalk"} onClick={() => setScene("crosswalk")}>Street</button><button aria-pressed={scene === "highway"} onClick={() => setScene("highway")}>Highway</button></nav>{scene === "highway" ? <Suspense fallback={<p role="status">Loading highway lab…</p>}><HighwayLab /></Suspense> : <CrosswalkApp />}</>;
+  return <><nav className="scene-switch" aria-label="Simulation scene"><strong>BLINDSPOT · SCENARIO LAB</strong><button aria-pressed={scene === "crosswalk"} onClick={() => setScene("crosswalk")}>Street</button><button aria-pressed={scene === "highway"} onClick={() => setScene("highway")}>Highway</button></nav><ScenarioLab key={scene} scene={scene} /></>;
 }
-function CrosswalkApp() {
-  const [draft, setDraft] = useState(DEFAULTS),
+function ScenarioLab({scene}) {
+  const highway = scene === "highway";
+  const defaults = highway ? HIGHWAY_DEFAULTS : DEFAULTS;
+  const storageKey = highway ? "blindspot-highway-runs-v1" : "blindspot-runs-v1";
+  const [draft, setDraft] = useState(defaults),
     [pair, setPair] = useState(null),
     [dirty, setDirty] = useState(false),
-    [replaySource, setReplaySource] = useState("Manual crosswalk scenario"),
+    [replaySource, setReplaySource] = useState(highway ? "Manual highway scenario" : "Manual crosswalk scenario"),
     [replayChanges, setReplayChanges] = useState(null),
     [simulating, setSimulating] = useState(false);
   const [policy, setPolicy] = useState("reactive"),
     [time, setTime] = useState(0),
     [playing, setPlaying] = useState(false);
   const [concern, setConcern] = useState(
-    "A pedestrian steps out from behind a parked van. When does the car brake too late?",
+    highway ? "Investigate repeated left–right lane changes near a right-side highway exit." : "A pedestrian steps out from behind a parked van. When does the car brake too late?",
   );
   const [connection, setConnection] = useState({}),
     [hosted, setHosted] = useState(false),
@@ -57,7 +63,7 @@ function CrosswalkApp() {
     [message, setMessage] = useState(null);
   const [runs, setRuns] = useState(() => {
     try {
-      const r = JSON.parse(localStorage.getItem("blindspot-runs-v1") || "[]");
+      const r = JSON.parse(localStorage.getItem(storageKey) || "[]");
       return Array.isArray(r)
         ? r.filter((x) => x && Array.isArray(x.rows) && x.summary).slice(0, 8)
         : [];
@@ -89,14 +95,14 @@ function CrosswalkApp() {
     };
   }, []);
   const simulate = useCallback(
-    async (s, auto = false, source = "Manual crosswalk scenario", preferredPolicy = null, changes = null) => {
+    async (s, auto = false, source = null, preferredPolicy = null, changes = null) => {
       const seq = ++sequence.current;
       setSimulating(true);
       try {
         const result = await request("/api/simulate", { scenario: s });
         if (seq !== sequence.current || !active.current) return;
         setPair(result);
-        setReplaySource(source);
+        setReplaySource(source || (s.kind === "highway" ? "Manual highway scenario" : "Manual crosswalk scenario"));
         setReplayChanges(changes);
         if (preferredPolicy) setPolicy(preferredPolicy);
         setDraft(result.reactive.scenario);
@@ -125,11 +131,11 @@ function CrosswalkApp() {
       .catch((e) => {
         if (!cancelled) notify(e.message, true);
       });
-    simulate(DEFAULTS);
+    simulate(defaults);
     return () => {
       cancelled = true;
     };
-  }, [simulate, notify]);
+  }, [simulate, notify, defaults]);
   function edit(key, value) {
     setDraft((s) => ({ ...s, [key]: value }));
     setDirty(true);
@@ -177,7 +183,7 @@ function CrosswalkApp() {
     try {
       const job = await request(
         "/api/investigate",
-        { mode: selected, seed: n, budget, concern },
+        { mode: selected, seed: n, budget, concern, scene: highway ? "highway" : "street" },
         controller.signal,
       );
       while (active.current && !controller.signal.aborted) {
@@ -196,18 +202,18 @@ function CrosswalkApp() {
           });
           if (selected === "ai") {
             const rows = state.result.rows;
-            const chosen = rows.find((row) => row.reactive.collision || row.cautious.collision) || rows[0];
-            const chosenPolicy = chosen?.reactive.collision ? "reactive"
+            const chosen = highway ? rows.reduce((best,row)=>row.reactive.direction_reversals>best.reactive.direction_reversals?row:best,rows[0]) : rows.find((row) => row.reactive.collision || row.cautious.collision) || rows[0];
+            const chosenPolicy = highway ? "reactive" : chosen?.reactive.collision ? "reactive"
               : chosen?.cautious.collision ? "cautious" : "reactive";
             setProgress("Investigation complete. Loading an AI-generated case into the replay…");
-            const labels = { speed_kmh: ["Vehicle speed", "km/h"], van_gap: ["Van gap", "m"], emerge_s: ["Pedestrian starts at", "s"], reaction_s: ["Reaction delay", "s"], ped_speed: ["Pedestrian speed", "m/s"], brake_mps2: ["Braking strength", "m/s²"], pedestrian: ["Pedestrian present", ""] };
-            const before = pair?.reactive.scenario || DEFAULTS;
+            const labels = highway ? Object.fromEntries(HIGHWAY_FIELDS.map(field=>[field[0],[field[1],field[5]]])) : { speed_kmh: ["Vehicle speed", "km/h"], van_gap: ["Van gap", "m"], emerge_s: ["Pedestrian starts at", "s"], reaction_s: ["Reaction delay", "s"], ped_speed: ["Pedestrian speed", "m/s"], brake_mps2: ["Braking strength", "m/s²"], pedestrian: ["Pedestrian present", ""] };
+            const before = pair?.reactive.scenario || defaults;
             const changes = chosen ? Object.entries(labels).filter(([key]) => before[key] !== chosen.scenario[key]).map(([key, [label, unit]]) => {
               const display = (value) => typeof value === "boolean" ? (value ? "yes" : "no") : `${value} ${unit}`;
               return `${label}: ${display(before[key])} → ${display(chosen.scenario[key])}`;
             }) : [];
             const loaded = chosen && await simulate(chosen.scenario, true,
-              `Live AI · case ${chosen.index} of ${rows.length} · ${chosen.reactive.collision || chosen.cautious.collision ? "first collision found" : "first generated case; no collisions found"}`,
+              `Live AI · case ${chosen.index} of ${rows.length} · ${highway ? "most direction reversals" : chosen.reactive.collision || chosen.cautious.collision ? "first collision found" : "first generated case; no collisions found"}`,
               chosenPolicy, changes);
             setProgress(loaded
               ? `Completed ${state.result.budget} tests. Replaying AI case ${chosen.index}; explore the other cases in the notebook.`
@@ -236,11 +242,11 @@ function CrosswalkApp() {
   }
   useEffect(() => {
     try {
-      localStorage.setItem("blindspot-runs-v1", JSON.stringify(runs));
+      localStorage.setItem(storageKey, JSON.stringify(runs));
     } catch {
       notify("Browser storage is full; export the run to keep it.");
     }
-  }, [runs, notify]);
+  }, [runs, notify, storageKey]);
   async function inspect() {
     setInspecting(true);
     try {
@@ -262,11 +268,11 @@ function CrosswalkApp() {
   const methodHelp =
     mode === "ai"
       ? connection.configured
-        ? "Live AI selected. Click Start AI investigation to generate crosswalk tests using your concern. Uses API credits; a generated case automatically plays in the replay when the run finishes."
+        ? "Live AI selected. Click Start AI investigation to generate tests in the selected environment using your concern. Uses API credits; a generated case automatically plays in the replay when the run finishes."
         : aiUnavailable
       : mode === "systematic"
         ? "Fixed low-discrepancy coverage across all ranges. No model calls; includes pedestrian-free controls."
-        : "A seeded random sample across all parameter ranges. Includes cases without pedestrians.";
+        : highway ? "A seeded random sample of highway traffic, lane-change, and exit parameters." : "A seeded random sample across all parameter ranges. Includes cases without pedestrians.";
   return (
     <>
       <header className="topbar">
@@ -320,15 +326,15 @@ function CrosswalkApp() {
               <br />
               <span>Understand the why.</span>
             </h1>
-            <p>A San Francisco–inspired street. Explore what happens when parked vehicles hide a pedestrian.</p>
+            <p>Explore driving decisions through reproducible simulated scenarios.</p>
           </div>
           <div className="intro-note">
             <span className="note-number">01 /</span>
             <div>
-              <strong>Street agent · crosswalk tests</strong>
+              <strong>{highway ? "Highway · lane-change tests" : "Street · crosswalk tests"}</strong>
               <p>
-                Original city scenery. Measured outcomes.
-                <br />Vary visibility, timing, and braking.
+                {highway ? "Moving traffic. Measured outcomes." : "Original city scenery. Measured outcomes."}
+                <br />{highway ? "Vary traffic, lane choices, and exits." : "Vary visibility, timing, and braking."}
               </p>
               <span className="tag">SIMULATED ENVIRONMENT</span>
             </div>
@@ -337,7 +343,7 @@ function CrosswalkApp() {
         <div className="workspace">
           <aside className="panel settings">
             <div className="panel-title">
-              <h2>Configure the crosswalk</h2>
+              <h2>{highway ? "Configure the highway" : "Configure the crosswalk"}</h2>
               <span className="step">01</span>
             </div>
             <label htmlFor="concern" className="field-label">
@@ -350,11 +356,11 @@ function CrosswalkApp() {
               onChange={(e) => setConcern(e.target.value)}
             />
             <p className="field-help">
-              Describe a pedestrian-crossing concern, then click Generate &amp; replay with AI.
+              Describe your concern, then click Generate &amp; replay with AI.
               When it finishes, a generated case automatically plays in the replay.
-              Typing alone does not change the scene.
-              For lane changes and highway exits, select Highway above. Parking is not supported yet.
-              Random and systematic searches do not use this text.
+              Typing alone does not change the scene.{" "}
+              {highway ? "Highway supports traffic, lane-change, and exit tests." : "Street supports pedestrian-crossing and occlusion tests."} Parking is not supported yet.
+              {highway ? "Random search does not use this text." : "Random and systematic searches do not use this text."}
             </p>
             <button
               id="generateReplayBtn"
@@ -369,6 +375,7 @@ function CrosswalkApp() {
             <div className="divider"></div>
             <h3>Manual parameters</h3>
             <p className="field-help">Adjust the controls below to replay a case without AI. These controls do not use the prompt above.</p>
+            {highway ? HIGHWAY_FIELDS.map(([key,label,min,max,step,unit])=><div className="control" key={key}><label htmlFor={key}>{label}<output>{draft[key]} {unit}</output></label><input id={key} type="range" min={min} max={max} step={step} value={draft[key]} onChange={e=>edit(key,Number(e.target.value))}/></div>) : <>
             <div className="control">
               <label htmlFor="speed">
                 Vehicle speed{" "}
@@ -480,6 +487,7 @@ function CrosswalkApp() {
                 Include pedestrian
               </label>
             </details>
+            </>}
             <button
               className="primary full"
               id="simulateBtn"
@@ -492,7 +500,7 @@ function CrosswalkApp() {
             <button
               className="quiet full"
               id="resetBtn"
-              onClick={() => simulate(DEFAULTS)}
+              onClick={() => simulate(defaults)}
             >
               Reset parameters
             </button>
@@ -504,11 +512,11 @@ function CrosswalkApp() {
                 <strong>Changes from the replay shown when you started this investigation</strong>
                 {replayChanges.length ? <ul>{replayChanges.map((change) => <li key={change}>{change}</li>)}</ul>
                   : <p>This generated case has the same inputs as the previous replay. Choose another case in the notebook.</p>}
-                <p>The street layout stays fixed. The generated inputs control the van position, car motion, and pedestrian timing.</p>
+                <p>{highway ? "Generated inputs control traffic speeds, gaps, exit distance, and lane decisions." : "The street layout stays fixed. Generated inputs control the van position, car motion, and pedestrian timing."}</p>
                 <button className="text-btn" onClick={() => { setTime(0); setPlaying(true); }}>Replay this AI case ↻</button>
               </div>
             )}
-            <Replay
+            {highway ? <Suspense fallback={<p>Loading replay…</p>}><HighwayReplay {...{pair,policy,setPolicy,time,setTime,playing,setPlaying}} /></Suspense> : <Replay
               pair={pair}
               policy={policy}
               setPolicy={setPolicy}
@@ -518,8 +526,8 @@ function CrosswalkApp() {
               setPlaying={setPlaying}
               dirty={dirty}
               notify={notify}
-            />
-            <Comparison pair={pair} inspect={inspect} loading={inspecting} />
+            />}
+            <Comparison pair={pair} inspect={inspect} loading={inspecting} highway={highway} />
           </section>
           <aside className="panel investigator">
             <div className="panel-title">
@@ -551,7 +559,7 @@ function CrosswalkApp() {
               className="select-full"
             >
               <option value="random">Random search · no AI</option>
-              <option value="systematic">Systematic search · no AI</option>
+              {!highway && <option value="systematic">Systematic search · no AI</option>}
               <option value="ai">NVIDIA Nemotron · live AI</option>
             </select>
             <p className="field-help" id="methodHelp" role="status" aria-live="polite">
@@ -624,14 +632,14 @@ function CrosswalkApp() {
                 results.
               </p>
             </div>
-            <button
+            {!highway && <button
               id="heldoutBtn"
               disabled={busy}
               onClick={() => investigate("held-out")}
               className="quiet full"
             >
               Run independent evaluation ↗
-            </button>
+            </button>}
           </aside>
         </div>
         <section
@@ -663,6 +671,7 @@ function CrosswalkApp() {
             </button>
           </div>
           <Notebook
+            highway={highway}
             runs={runs}
             download={download}
             load={(s) => {
@@ -676,7 +685,7 @@ function CrosswalkApp() {
             <strong>blindspot</strong> / Experimental policy evaluation
           </span>
           <span>
-            3D replay · 2D geometry · 40 Hz physics · simplified sensing · not
+            3D replay · 2D geometry · {highway ? "10" : "40"} Hz physics · simplified sensing · not
             real-world safety validation
           </span>
         </footer>

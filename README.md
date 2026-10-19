@@ -4,7 +4,7 @@ A working prototype for investigating autonomous-driving controller behavior in 
 
 ## Choose an environment
 
-Use the **Street / Highway** selector at the top of the app.
+Use the **Street / Highway** selector at the top of the app. Both environments share the same scenario-lab layout, prompt workflow, replay controls, comparison table, and investigation notebook. Switching environments changes the simulation, supported parameters, and controller labels within that interface.
 
 | Environment | What the AI can vary | Controller comparison |
 | --- | --- | --- |

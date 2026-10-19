@@ -77,3 +77,7 @@ Desktop/mobile browser checks passed for real random highway investigations, cam
 The default illustrative highway case has 7 lane changes and 4 direction reversals for the aggressive policy, versus 5 and 2 for exit-aware; both reach the exit. This is a selected demonstration case, not a performance benchmark. Existing AI-versus-random benchmark claims apply only to the historical Street run.
 
 The Docker build and local-container checks passed for health, authenticated compiled assets, highway simulation, and moving traffic. The new highway modules are included in both Dockerfile and its build-context allowlist. Public Render deployment remains unverified.
+
+## Unified environment interface
+
+Replaced the separate Highway page with the shared scenario-lab shell used by Street. Both modes use the same header, workspace, prompt action, investigator panel, comparison component, and notebook; Highway retains only its environment-specific replay renderer and parameter schema. Camera buttons, controller tabs, HUD, replay dimensions, and playback controls now match Street. Browser checks confirmed identical desktop replay dimensions/headline, highway AI routing and automatic replay using mocked results, correct controller labels and metrics, separate saved histories, mobile layout without horizontal overflow, and switching back to Street. Four frontend tests and the production build pass. No paid model calls were made; Render deployment remains unverified.

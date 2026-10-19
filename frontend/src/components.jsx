@@ -18,8 +18,8 @@ export function Outcome({ metrics: m }) {
     </span>
   );
 }
-export function Comparison({ pair, inspect, loading }) {
-  const rows = [
+export function Comparison({ pair, inspect, loading, highway = false }) {
+  const rows = highway ? [["Lane changes", "lane_changes", ""], ["Direction reversals", "direction_reversals", ""], ["Exit taken", "exit_success", ""], ["Missed exit", "missed_exit", ""], ["Minimum clearance", "min_clearance_m", "m"], ["Elapsed / end of run", "duration_s", "s"]] : [
     ["Impact speed", "impact_kmh", "km/h"],
     ["First braking", "first_brake_s", "s"],
     ["Minimum clearance", "min_clearance_m", "m"],
@@ -37,8 +37,8 @@ export function Comparison({ pair, inspect, loading }) {
             <thead>
               <tr>
                 <th>MEASUREMENT</th>
-                <th>REACTIVE</th>
-                <th>OCCLUSION-AWARE</th>
+                <th>{highway ? "AGGRESSIVE" : "REACTIVE"}</th>
+                <th>{highway ? "EXIT-AWARE" : "OCCLUSION-AWARE"}</th>
               </tr>
             </thead>
             <tbody>
@@ -54,7 +54,7 @@ export function Comparison({ pair, inspect, loading }) {
                 <tr key={key}>
                   <td>{label}</td>
                   {["reactive", "cautious"].map((p) => (
-                    <td key={p}>{metric(pair[p].metrics[key], unit)}</td>
+                    <td key={p}>{typeof pair[p].metrics[key] === "boolean" ? (pair[p].metrics[key] ? "Yes" : "No") : metric(pair[p].metrics[key], unit)}</td>
                   ))}
                 </tr>
               ))}
@@ -64,19 +64,19 @@ export function Comparison({ pair, inspect, loading }) {
       </div>
       <div className="comparison-footer">
         <span>Rule-based controllers · identical conditions</span>
-        <button
+        {!highway && <button
           id="counterBtn"
           className="text-btn"
           disabled={!pair || loading}
           onClick={inspect}
         >
           Investigate inputs ↗
-        </button>
+        </button>}
       </div>
     </div>
   );
 }
-export function Notebook({ runs, load, download }) {
+export function Notebook({ runs, load, download, highway = false }) {
   return (
     <div
       id="notebook"
@@ -101,7 +101,7 @@ export function Notebook({ runs, load, download }) {
               <div>
                 <h3>{names[r.mode] || r.mode}</h3>
                 <div className="metadata">
-                  {r.budget} tests · {r.unique_scenarios} unique · {r.elapsed_s}
+                  {r.budget} tests · {r.unique_scenarios ?? new Set(r.rows.map(row=>row.id)).size} unique · {r.elapsed_s ?? "—"}
                   s runtime · {r.model || "No AI model"}
                   {r.mode === "random" ? " · seed " + r.seed : ""}
                 </div>
@@ -122,7 +122,7 @@ export function Notebook({ runs, load, download }) {
                     {r.summary[p].collisions} / {r.budget}
                   </b>
                   <span>
-                    {p === "reactive" ? "Reactive" : "Occlusion-aware"}{" "}
+                    {p === "reactive" ? (highway ? "Aggressive" : "Reactive") : (highway ? "Exit-aware" : "Occlusion-aware")}{" "}
                     collisions
                   </span>
                 </div>
@@ -133,7 +133,7 @@ export function Notebook({ runs, load, download }) {
                     ? "—"
                     : "#" + r.summary.reactive.first_failure_test}
                 </b>
-                <span>First reactive failure</span>
+                <span>First {highway ? "aggressive" : "reactive"} failure</span>
               </div>
             </div>
             <div className="cases">
@@ -148,7 +148,7 @@ export function Notebook({ runs, load, download }) {
                   }
                   onClick={() => load(row.scenario)}
                 >
-                  #{String(row.index).padStart(2, "0")}{" "}
+                  #{String(row.index).padStart(2, "0")}{" "}{highway && `${row.reactive.direction_reversals} reversals · `}
                   {row.reactive.collision || row.cautious.collision
                     ? "↗ failure"
                     : "· clear"}
