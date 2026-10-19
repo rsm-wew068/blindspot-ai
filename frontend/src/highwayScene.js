@@ -62,10 +62,4 @@ export function createHighway(canvas) {
     dispose(){geometry.dispose();for(const m of materials.values())m.dispose();signGeo.dispose();signMat.dispose();texture.dispose();ringGeo.dispose();ringMat.dispose();renderer.dispose();}
   };
 }
-export function highwayFrame(frames,time){
-  let i=0;while(i+1<frames.length&&frames[i+1].t<=time)i++;
-  const a=frames[i],b=frames[i+1];if(!b)return a;
-  const f=Math.max(0,Math.min(1,(time-a.t)/(b.t-a.t))),byId=new Map(b.traffic.map(c=>[c.id,c]));
-  return {...a,x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,v:a.v+(b.v-a.v)*f,
-    lateral:(b.y-a.y)/Math.max(.01,b.x-a.x),traffic:a.traffic.map(c=>({...c,x:c.x+((byId.get(c.id)?.x??c.x)-c.x)*f}))};
-}
+export { highwayFrame } from './highwayReplay.js';

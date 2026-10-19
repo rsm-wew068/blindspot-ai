@@ -81,3 +81,7 @@ The Docker build and local-container checks passed for health, authenticated com
 ## Unified environment interface
 
 Replaced the separate Highway page with the shared scenario-lab shell used by Street. Both modes use the same header, workspace, prompt action, investigator panel, comparison component, and notebook; Highway retains only its environment-specific replay renderer and parameter schema. Camera buttons, controller tabs, HUD, replay dimensions, and playback controls now match Street. Browser checks confirmed identical desktop replay dimensions/headline, highway AI routing and automatic replay using mocked results, correct controller labels and metrics, separate saved histories, mobile layout without horizontal overflow, and switching back to Street. Four frontend tests and the production build pass. No paid model calls were made; Render deployment remains unverified.
+
+## Single persistent replay viewport
+
+Moved Street/Highway selection into Live replay and removed the separate Highway replay component. Both environments use the same mounted Replay component, canvas DOM element, HUD, and playback controls. Browser checks verified canvas/header/prompt identity across switches, preserved prompt/camera/mute/playback-speed settings, separate histories, highway AI result handoff with mocked job results, and mobile layout. Screenshots inspected; no browser errors. Four frontend tests and the build pass. No new model calls; public deployment unverified.

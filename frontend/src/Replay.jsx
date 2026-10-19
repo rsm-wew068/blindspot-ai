@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { drawMap } from "./map.js";
 import { createImpactAudio, enteredCollision } from "./impact.js";
+import { highwayFrame, drawHighwayMap } from "./highwayReplay.js";
 import { frameAt } from "./replay.js";
 const cameras = {
   chase: "Chase",
@@ -9,6 +10,9 @@ const cameras = {
   "2d": "2D map",
 };
 export default function Replay({
+  scene,
+  setScene,
+  switchingDisabled,
   pair,
   policy,
   setPolicy,
@@ -19,6 +23,7 @@ export default function Replay({
   dirty,
   notify,
 }) {
+  const highway = scene === "highway";
   const [camera, setCamera] = useState("chase"),
     [occlusion, setOcclusion] = useState(false),
     [available, setAvailable] = useState(false),
@@ -55,9 +60,10 @@ export default function Replay({
     document.addEventListener('keydown', unlock);
     return () => { document.removeEventListener('pointerdown', unlock); document.removeEventListener('keydown', unlock); };
   }, [sound]);
-  const run = pair?.[policy],
+  const candidate = pair?.[policy];
+  const run = candidate && (candidate.scenario.kind === "highway") === highway ? candidate : null,
     duration = run?.metrics.duration_s || 0;
-  const frame = run ? frameAt(run.frames, time) : null,
+  const frame = run ? (highway ? highwayFrame : frameAt)(run.frames, time) : null,
     end = !!run && time >= duration,
     collision = end && run.metrics.collision;
   useEffect(() => {
@@ -68,6 +74,7 @@ export default function Replay({
   }, [run, time, playing, duration, collision, sound]);
   latest.current = {
     frame,
+    highway,
     scenario: run?.scenario,
     time,
     collision,
@@ -78,7 +85,7 @@ export default function Replay({
   paint.current = () => {
     const s = latest.current;
     if (!s.frame) return;
-    drawMap(map.current, s.frame, s.scenario, s.collision);
+    (s.highway ? drawHighwayMap : drawMap)(map.current, s.frame, s.scenario, s.collision);
     if (view.current && s.camera !== "2d") {
       view.current.setCamera(s.camera);
       view.current.setOcclusion(s.occlusion);
@@ -97,10 +104,15 @@ export default function Replay({
       notify("3D is unavailable. The 2D replay remains available.");
     };
     target.addEventListener("webglcontextlost", fallback);
-    import("./street.js")
-      .then(({ createStreet }) => {
+    setAvailable(false);setFailed(false);
+    (highway ? import("./highwayScene.js") : import("./street.js"))
+      .then((module) => {
         if (cancelled) return;
-        owned = createStreet(target);
+        if (highway) {
+          const renderer = module.createHighway(target);
+          let selectedCamera = camera;
+          owned = {setCamera(value){selectedCamera=value;},setOcclusion(){},update(frame,scenario,time,collision){renderer.update(frame,scenario,selectedCamera === "overview" ? "top" : selectedCamera,collision);},dispose:renderer.dispose};
+        } else owned = module.createStreet(target);
         view.current = owned;
         setAvailable(true);
       })
@@ -116,7 +128,7 @@ export default function Replay({
       if (view.current === owned) view.current = null;
       owned?.dispose();
     };
-  }, [notify]);
+  }, [notify, highway]);
   useEffect(() => {
     paint.current();
   }, [pair, policy, time, camera, occlusion, available]);
@@ -190,8 +202,8 @@ export default function Replay({
             }}
           >
             {p === "reactive"
-              ? "Reactive controller"
-              : "Occlusion-aware controller"}
+              ? (highway ? "Aggressive controller" : "Reactive controller")
+              : (highway ? "Exit-aware controller" : "Occlusion-aware controller")}
           </button>
         ))}
       </div>
@@ -215,7 +227,7 @@ export default function Replay({
             id="showOcclusion"
             type="checkbox"
             checked={occlusion}
-            disabled={!use3d}
+            disabled={!use3d || highway}
             onChange={(e) => setOcclusion(e.target.checked)}
           />{" "}
           Hidden area
@@ -224,7 +236,7 @@ export default function Replay({
           onChange={e => enableSound(e.target.checked)} /> Impact sound {sound ? "on" : "off"}</label>
         <button id="testImpactSound" className="text-btn" onClick={() => enableSound(true, true)}>Test sound ♪</button>
       </div>
-      <p className="street-note">One-way test lane · curbside cars are parked scenery</p>
+      <div className="replay-environment" role="group" aria-label="Replay environment"><span>ENVIRONMENT</span>{[["crosswalk","Street"],["highway","Highway"]].map(([value,label])=><button key={value} disabled={switchingDisabled} aria-pressed={scene===value} onClick={()=>setScene(value)}>{label}</button>)}<small>{highway ? "Moving traffic · right-side exit" : "Curbside cars are parked scenery"}</small></div>
       <div
         className={"canvas-wrap" + (use3d ? " street-active" : "")}
         id="sceneWrap"
@@ -239,7 +251,7 @@ export default function Replay({
           ref={canvas}
           id="streetScene"
           hidden={!use3d}
-          aria-label="3D street replay of the computed simulation"
+          aria-label="3D replay of the computed simulation"
         />
         {collision && <div className="impact-cue" role="status" aria-live="polite">
           <div className="impact-vignette" />
@@ -249,12 +261,12 @@ export default function Replay({
         {frame && (
           <div className="driving-hud" id="drivingHud" hidden={!use3d}>
             <div className="hud-context">
-              <span>OBSTRUCTED CROSSWALK</span>
+              <span>{highway ? "RIGHT-SIDE HIGHWAY EXIT" : "OBSTRUCTED CROSSWALK"}</span>
               <strong id="hudDistance">
-                {Math.max(0, 45 - frame.x - 2.1).toFixed(1)} m to crossing
+                {highway ? `${Math.max(0, run.scenario.exit_distance_m-frame.x).toFixed(0)} m to exit` : `${Math.max(0, 45-frame.x-2.1).toFixed(1)} m to crossing`}
               </strong>
               <small id="hudVisibility">
-                {frame.ped_y === null
+                {highway ? frame.reason : frame.ped_y === null
                   ? "NO PEDESTRIAN"
                   : frame.visible
                     ? "PEDESTRIAN VISIBLE"
@@ -280,7 +292,7 @@ export default function Replay({
           </div>
         )}
         <div className="scene-top">
-          <span className="scene-tag">CROSSWALK 01</span>
+          <span className="scene-tag">{highway ? "HIGHWAY 01" : "CROSSWALK 01"}</span>
           <span id="sceneStatus" className="scene-status">
             {status}
           </span>
@@ -290,10 +302,10 @@ export default function Replay({
             <i className="legend-car" /> Test vehicle
           </span>
           <span>
-            <i className="legend-ped" /> Pedestrian
+            <i className="legend-ped" /> {highway ? "Moving traffic" : "Pedestrian"}
           </span>
           <span>
-            <i className="legend-blind" /> Obstructed view
+            <i className="legend-blind" /> {highway ? "Right-side exit" : "Obstructed view"}
           </span>
         </div>
       </div>

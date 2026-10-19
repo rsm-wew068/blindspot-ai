@@ -1,4 +1,1 @@
-.scene-switch{display:flex;gap:10px;align-items:center;padding:12px 24px;background:#f0eee6;border-bottom:1px solid #d8d8cd;flex-wrap:wrap}
-.scene-switch strong{margin-right:auto}.scene-switch button{border:1px solid #bac5bd;background:white;padding:9px 18px;border-radius:24px;cursor:pointer}.scene-switch button[aria-pressed=true]{background:#183e36;color:white}
-.highway-replay{scroll-margin-top:12px}.highway-viewport{overflow:hidden}.highway-viewport canvas[hidden]{display:none}
-.highway-replay>.field-help{padding:0 18px 12px}.highway-replay .muted{font-size:10px;color:var(--muted);font-weight:400}
+.replay-environment{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:0 18px 12px;font-size:10px}.replay-environment>span{font:8px var(--mono);letter-spacing:1px;color:#6b7b6b}.replay-environment button{border:1px solid var(--line);background:white;color:#314431;border-radius:5px;padding:6px 12px;cursor:pointer;font-size:10px}.replay-environment button[aria-pressed=true]{background:#183e36;color:white}.replay-environment button:disabled{cursor:wait;opacity:.6}.replay-environment small{margin-left:auto;color:#6b7b6b;font-size:9px}

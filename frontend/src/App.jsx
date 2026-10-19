@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Replay from "./Replay.jsx";
 import "./highway.css";
-const HighwayReplay = lazy(() => import("./HighwayLab.jsx"));
 const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:115,traffic_kmh:85,speed_variation:23,spacing_m:85,exit_distance_m:950,aggressiveness:.9,traffic_phase:3};
 const HIGHWAY_FIELDS = [["speed_kmh","Target speed",80,130,1,"km/h"],["traffic_kmh","Traffic speed",60,110,1,"km/h"],["speed_variation","Traffic speed variation",0,30,1,"km/h"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",350,1600,10,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
 
@@ -32,12 +31,8 @@ async function request(path, data, signal) {
 }
 export default function App() {
   const [scene, setScene] = useState("crosswalk");
-  return <><nav className="scene-switch" aria-label="Simulation scene"><strong>BLINDSPOT · SCENARIO LAB</strong><button aria-pressed={scene === "crosswalk"} onClick={() => setScene("crosswalk")}>Street</button><button aria-pressed={scene === "highway"} onClick={() => setScene("highway")}>Highway</button></nav><ScenarioLab key={scene} scene={scene} /></>;
-}
-function ScenarioLab({scene}) {
   const highway = scene === "highway";
   const defaults = highway ? HIGHWAY_DEFAULTS : DEFAULTS;
-  const storageKey = highway ? "blindspot-highway-runs-v1" : "blindspot-runs-v1";
   const [draft, setDraft] = useState(defaults),
     [pair, setPair] = useState(null),
     [dirty, setDirty] = useState(false),
@@ -61,16 +56,12 @@ function ScenarioLab({scene}) {
     [counter, setCounter] = useState(null),
     [inspecting, setInspecting] = useState(false),
     [message, setMessage] = useState(null);
-  const [runs, setRuns] = useState(() => {
-    try {
-      const r = JSON.parse(localStorage.getItem(storageKey) || "[]");
-      return Array.isArray(r)
-        ? r.filter((x) => x && Array.isArray(x.rows) && x.summary).slice(0, 8)
-        : [];
-    } catch {
-      return [];
-    }
+  const [histories, setHistories] = useState(() => {
+    const read = key => {try {const data=JSON.parse(localStorage.getItem(key)||"[]");return Array.isArray(data)?data.filter(r=>r&&Array.isArray(r.rows)&&r.summary).slice(0,8):[];} catch {return [];}};
+    return {crosswalk:read("blindspot-runs-v1"), highway:read("blindspot-highway-runs-v1")};
   });
+  const runs = histories[scene];
+  const setRuns = update => setHistories(current=>({...current,[scene]:typeof update === "function" ? update(current[scene]) : update}));
   const notebookRef = useRef(null),
     sequence = useRef(0),
     toastTimer = useRef(null),
@@ -131,11 +122,16 @@ function ScenarioLab({scene}) {
       .catch((e) => {
         if (!cancelled) notify(e.message, true);
       });
-    simulate(defaults);
+
     return () => {
       cancelled = true;
     };
-  }, [simulate, notify, defaults]);
+  }, [simulate, notify]);
+  useEffect(() => {
+    setPlaying(false);setTime(0);setPair(null);setDraft(defaults);setDirty(false);setProgress("");setReplayChanges(null);setDialog(null);setPolicy("reactive");
+    setMode(current=>highway && current === "systematic" ? "ai" : current);
+    simulate(defaults);
+  }, [defaults, highway, simulate]);
   function edit(key, value) {
     setDraft((s) => ({ ...s, [key]: value }));
     setDirty(true);
@@ -242,11 +238,12 @@ function ScenarioLab({scene}) {
   }
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(runs));
+      localStorage.setItem("blindspot-runs-v1", JSON.stringify(histories.crosswalk));
+      localStorage.setItem("blindspot-highway-runs-v1", JSON.stringify(histories.highway));
     } catch {
       notify("Browser storage is full; export the run to keep it.");
     }
-  }, [runs, notify, storageKey]);
+  }, [histories, notify]);
   async function inspect() {
     setInspecting(true);
     try {
@@ -331,10 +328,10 @@ function ScenarioLab({scene}) {
           <div className="intro-note">
             <span className="note-number">01 /</span>
             <div>
-              <strong>{highway ? "Highway · lane-change tests" : "Street · crosswalk tests"}</strong>
+              <strong>One lab. Two environments.</strong>
               <p>
-                {highway ? "Moving traffic. Measured outcomes." : "Original city scenery. Measured outcomes."}
-                <br />{highway ? "Vary traffic, lane choices, and exits." : "Vary visibility, timing, and braking."}
+                Street and highway simulations.
+                <br />Reproducible tests. Measured outcomes.
               </p>
               <span className="tag">SIMULATED ENVIRONMENT</span>
             </div>
@@ -343,7 +340,7 @@ function ScenarioLab({scene}) {
         <div className="workspace">
           <aside className="panel settings">
             <div className="panel-title">
-              <h2>{highway ? "Configure the highway" : "Configure the crosswalk"}</h2>
+              <h2>Configure the scenario</h2>
               <span className="step">01</span>
             </div>
             <label htmlFor="concern" className="field-label">
@@ -516,7 +513,10 @@ function ScenarioLab({scene}) {
                 <button className="text-btn" onClick={() => { setTime(0); setPlaying(true); }}>Replay this AI case ↻</button>
               </div>
             )}
-            {highway ? <Suspense fallback={<p>Loading replay…</p>}><HighwayReplay {...{pair,policy,setPolicy,time,setTime,playing,setPlaying}} /></Suspense> : <Replay
+            <Replay
+              scene={scene}
+              setScene={setScene}
+              switchingDisabled={busy || simulating || inspecting}
               pair={pair}
               policy={policy}
               setPolicy={setPolicy}
@@ -526,7 +526,7 @@ function ScenarioLab({scene}) {
               setPlaying={setPlaying}
               dirty={dirty}
               notify={notify}
-            />}
+            />
             <Comparison pair={pair} inspect={inspect} loading={inspecting} highway={highway} />
           </section>
           <aside className="panel investigator">
