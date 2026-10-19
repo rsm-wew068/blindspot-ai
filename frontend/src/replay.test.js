@@ -36,3 +36,15 @@ test('impact sound fires only when playback enters a collision, never on scrubbi
   assert.equal(enteredCollision({...before, time:3}, end), false);
   assert.equal(enteredCollision(before, {...end, collision:false}), false);
 });
+
+import { highwayFrame } from './highwayScene.js';
+test('highway replay interpolates lane motion and traffic by stable vehicle identity', () => {
+  const frames = [
+    {t:0,x:0,y:0,v:20,traffic:[{id:'a',x:10,y:0},{id:'b',x:30,y:3.6}]},
+    {t:1,x:20,y:3.6,v:22,traffic:[{id:'b',x:50,y:3.6},{id:'a',x:34,y:0}]},
+  ];
+  const frame = highwayFrame(frames,.5);
+  assert.equal(frame.x,10);assert.equal(frame.y,1.8);
+  assert.equal(frame.traffic[0].x,22);assert.equal(frame.traffic[1].x,40);
+  assert.deepEqual(highwayFrame(frames,5),frames[1]);
+});

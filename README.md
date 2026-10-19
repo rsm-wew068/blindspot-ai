@@ -1,6 +1,25 @@
 # BlindSpot
 
-A working local prototype for investigating autonomous-driving controller failures around an obstructed crosswalk. Outcomes are computed by a deterministic 2D simulator. The two driving controllers are hand-written baselines, not trained prediction models.
+A working prototype for investigating autonomous-driving controller behavior in two environments: **Street** and **Highway**. Each has a dedicated AI test-design prompt, bounded scenario schema, deterministic simulator, and Three.js replay. Driving controllers are handwritten experimental baselines, not trained prediction models or Tesla FSD.
+
+## Choose an environment
+
+Use the **Street / Highway** selector at the top of the app.
+
+| Environment | What the AI can vary | Controller comparison |
+| --- | --- | --- |
+| Street | Vehicle speed, van gap, pedestrian presence, crossing timing/speed, reaction delay, braking strength | Reactive vs occlusion-aware |
+| Highway | Target speed, traffic speed/variation, spacing, exit distance, aggressiveness, traffic phase | Aggressive vs exit-aware |
+
+**Generate & replay with AI** sends the selected environment's concern to Nemotron and automatically plays a measured case after the investigation. Typing alone does not start inference. Manual parameters and random search work without AI. Street and Highway keep separate browser-local investigation histories.
+
+Street uses original San Francisco-inspired pastel facades, bay windows, and parking meters around a flat crosswalk segment. It is not a mapped San Francisco street. Traffic lights, parking search, and arbitrary city navigation are not simulated.
+
+Highway has three lanes, moving vehicles, a right-side exit, continuous two-second lane changes, and swept vehicle collision checks at 10 Hz. Background traffic follows prescribed lane-specific speed waves and does not react to the ego car. Both controllers get identical traffic. The aggressive policy seeks faster lanes; the exit-aware policy uses more hysteresis, larger merge gaps, and earlier exit preparation. Neither is guaranteed safer. Metrics include lane changes initiated, direction reversals, collisions, minimum clearance, exit success, and elapsed time. The renderer follows simulation frames, including lateral movement; it does not animate a fixed zigzag.
+
+Example highway concern: “Investigate repeated left–right lane changes near a right-side exit when the controller aggressively prioritizes speed.” The selected replay is the generated case with the most aggressive-controller reversals, not a representative or statistically validated sample. It may not collide or miss the exit.
+
+Highway live inference is wired to the existing Nebius connection but has only been tested with mocked provider responses; no new paid model calls were made for this addition. The earlier live AI benchmark applies to Street only.
 
 ## Project status
 
@@ -49,7 +68,7 @@ Choose **NVIDIA Nemotron · live AI** and start an investigation. The model prop
 
 Live runs send your concern and synthetic simulation measurements to Nebius and consume account credits. Up to eight proposal calls are allowed per run, with 45-second timeouts per request. This is real inference only when connected: absent credentials or failed requests produce an explicit error, never simulated AI output. The integration has been tested with mocked provider responses and a live NVIDIA Nemotron Nano smoke test. Your own account and key are required for live inference. Requests use a strict JSON schema, and local validation remains mandatory.
 
-## Physics and sensing assumptions
+## Street physics and sensing assumptions
 
 - A single vehicle starts at x=0, with fixed initial/maximum speed, and finishes at x=57 m. A pedestrian crosses at x=45 m.
 - Vehicle footprint: 4.2 × 1.8 m. The pedestrian uses a conservative 0.6 × 0.6 m axis-aligned collision envelope. No steering, tire dynamics, road friction changes, other vehicles, or image-based perception.
@@ -61,7 +80,7 @@ Live runs send your concern and synthetic simulation measurements to Nebius and 
 - The replay uses different horizontal and vertical display scales for readability. The highlighted angular sector indicates the occluder's bearing from the sensor, not a calibrated sensor confidence map. Simulation uses metric coordinates.
 - Scenario hashes include all parameters and the simulator version. Model proposals are not guaranteed deterministic, but recorded scenarios are exactly replayable with the same version.
 
-## Evaluation and limitations
+## Street evaluation and shared limitations
 
 Random and systematic search are functioning non-AI baselines. The systematic baseline uses a fixed low-discrepancy sequence; its seed is not used. AI uses its concern and previous results; the seed field does not make live generation reproducible. Each scenario consumes two controller rollouts in every method. Compare equal budgets, multiple random seeds, unique cases, failure discovery order, runtime, and provider token use. One run cannot establish an advantage for AI.
 
@@ -73,7 +92,7 @@ The current prototype implements local one-variable counterfactuals. It does not
 
 Three.js 0.169.0 is pinned through npm and bundled locally by Vite under its MIT license. It loads as a separate chunk when the replay mounts. Chase, driver, and bird’s-eye cameras display the same recorded positions as the 2D map; switching controllers preserves replay time (clamped to the selected run’s end). The optional hidden-area overlay projects the van’s ground-plane occlusion from the simulated vehicle-front sensor. The HUD reports the simulator’s visibility flag, speed, braking and outcome.
 
-Collision replays show a non-graphic impact marker, a brief edge pulse (disabled with reduced-motion preferences), and measured impact speed. Impact sound is on by default and activates after your first click or keypress. Use **Test sound** to preview the synthesized impact, or turn **Impact sound** off to mute it. Scrubbing and switching controllers stay silent.
+Street collision replays show a non-graphic impact marker, a brief edge pulse (disabled with reduced-motion preferences), and measured impact speed. Impact sound is on by default and activates after your first click or keypress. Use **Test sound** to preview the synthesized impact, or turn **Impact sound** off to mute it. Scrubbing and switching controllers stay silent.
 
 The street is original procedural geometry with a single forward travel lane and marked curbside parking bays. Stationary background cars are intentionally parked scenery; only the test vehicle and pedestrian are simulated actors. Buildings, trees, lights and background parked vehicles are decorative and do not enter the physics or sensing model. This is a stylized 3D visualization of a 2D simulation, not camera-based perception or a full 3D driving simulator. WebGL failure falls back to the existing 2D replay. No new API calls or keys are needed for graphics.
 
@@ -97,7 +116,7 @@ Tests cover observation isolation, visibility geometry, continuous collision det
 python3 replay.py path/to/blindspot-case.json
 ```
 
-This recomputes both controllers, compares recorded measurements when available, and reports version mismatches rather than silently treating them as equivalent.
+This recomputes both controllers for a Street case or a Highway investigation export, compares recorded measurements when available, and reports version mismatches rather than silently treating them as equivalent.
 
 ## Sources
 

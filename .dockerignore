@@ -5,6 +5,8 @@
 !server.py
 !investigation.py
 !simulation.py
+!highway.py
+!highway_investigation.py
 !frontend_assets.py
 !frontend/
 !frontend/package.json

@@ -19,6 +19,7 @@ class HostedTests(unittest.TestCase):
         (self.frontend / 'assets').mkdir(parents=True)
         (self.frontend / 'index.html').write_text('<div id="root"></div>')
         (self.frontend / 'assets/street-test.js').write_text('export default 1;' * 10)
+        (self.frontend / 'assets/three.module-test.js').write_text('export default 1;' * 10)
         self.assets = patch.object(frontend_assets, 'FRONTEND_ROOT', self.frontend)
         self.assets.start()
 
@@ -44,7 +45,7 @@ class HostedTests(unittest.TestCase):
             self.assertTrue(self.call(path,auth=False)[0].startswith('401'))
 
     def test_3d_assets_are_served_with_javascript_mime(self):
-        for path in ('/assets/street-test.js',):
+        for path in ('/assets/street-test.js', '/assets/three.module-test.js'):
             status, headers, body = self.call(path)
             self.assertTrue(status.startswith('200'))
             self.assertIn('text/javascript', headers['Content-Type'])
@@ -76,6 +77,13 @@ class HostedTests(unittest.TestCase):
         status,_,body=self.call('/api/simulate','POST',{},origin='https://example.test')
         self.assertTrue(status.startswith('200'))
         self.assertIn('reactive',json.loads(body))
+
+    def test_highway_simulation_uses_highway_schema(self):
+        status,_,body=self.call('/api/simulate','POST',{'scenario':{'kind':'highway'}},origin='https://example.test')
+        self.assertTrue(status.startswith('200'))
+        result=json.loads(body)
+        self.assertEqual(result['reactive']['scenario']['kind'],'highway')
+        self.assertIn('lane_changes',result['reactive']['metrics'])
 
     def test_ai_off_even_with_key(self):
         os.environ['NEBIUS_TOKEN_FACTORY_KEY']='test-key-not-real'

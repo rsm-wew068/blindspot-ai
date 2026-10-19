@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import Replay from "./Replay.jsx";
+import "./highway.css";
+const HighwayLab = lazy(() => import("./HighwayLab.jsx"));
 import { Comparison, Notebook, Modal, Outcome } from "./components.jsx";
 const DEFAULTS = {
   speed_kmh: 45,
@@ -26,6 +28,10 @@ async function request(path, data, signal) {
   return result;
 }
 export default function App() {
+  const [scene, setScene] = useState("crosswalk");
+  return <><nav className="scene-switch" aria-label="Simulation scene"><strong>BLINDSPOT · SCENARIO LAB</strong><button aria-pressed={scene === "crosswalk"} onClick={() => setScene("crosswalk")}>Street</button><button aria-pressed={scene === "highway"} onClick={() => setScene("highway")}>Highway</button></nav>{scene === "highway" ? <Suspense fallback={<p role="status">Loading highway lab…</p>}><HighwayLab /></Suspense> : <CrosswalkApp />}</>;
+}
+function CrosswalkApp() {
   const [draft, setDraft] = useState(DEFAULTS),
     [pair, setPair] = useState(null),
     [dirty, setDirty] = useState(false),
@@ -314,15 +320,15 @@ export default function App() {
               <br />
               <span>Understand the why.</span>
             </h1>
-            <p>Explore what happens when the road hides what’s ahead.</p>
+            <p>A San Francisco–inspired street. Explore what happens when parked vehicles hide a pedestrian.</p>
           </div>
           <div className="intro-note">
             <span className="note-number">01 /</span>
             <div>
-              <strong>The obstructed crosswalk</strong>
+              <strong>Street agent · crosswalk tests</strong>
               <p>
-                One vehicle. One blind spot.
-                <br />A thousand ways it could unfold.
+                Original city scenery. Measured outcomes.
+                <br />Vary visibility, timing, and braking.
               </p>
               <span className="tag">SIMULATED ENVIRONMENT</span>
             </div>
@@ -347,7 +353,7 @@ export default function App() {
               Describe a pedestrian-crossing concern, then click Generate &amp; replay with AI.
               When it finishes, a generated case automatically plays in the replay.
               Typing alone does not change the scene.
-              Lane changes, highway exits, and parking are not supported yet.
+              For lane changes and highway exits, select Highway above. Parking is not supported yet.
               Random and systematic searches do not use this text.
             </p>
             <button

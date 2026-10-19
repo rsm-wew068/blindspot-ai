@@ -10,7 +10,7 @@ def frontend_asset(path):
         relative, mime = 'index.html', 'text/html; charset=utf-8'
     elif path == '/THREE-LICENSE.txt':
         relative, mime = 'THREE-LICENSE.txt', 'text/plain; charset=utf-8'
-    elif re.fullmatch(r'/assets/[A-Za-z0-9_-]+\.(js|css)', path):
+    elif re.fullmatch(r'/assets/[A-Za-z0-9][A-Za-z0-9_.-]*\.(js|css)', path):
         relative = path.lstrip('/')
         mime = 'text/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
     else:

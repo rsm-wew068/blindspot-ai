@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 
 from frontend_assets import frontend_asset
 from simulation import Scenario, VERSION, compare
+from highway import HighwayScenario, compare as compare_highway
 from investigation import connection, counterfactuals, held_out, investigate
 
 ROOT = Path(__file__).resolve().parent
@@ -33,7 +34,10 @@ def work(job_id, data):
         with LOCK:
             JOBS[job_id]["progress"] = value
     try:
-        if data.get("mode") == "held-out":
+        if data.get("scene") == "highway":
+            from highway_investigation import investigate as investigate_highway
+            result = investigate_highway(data.get("mode", "random"), data.get("seed", 17), data.get("budget", 12), data.get("concern", ""), progress)
+        elif data.get("mode") == "held-out":
             result = held_out()
         else:
             result = investigate(data.get("mode", "random"), data.get("seed", 17),
@@ -109,10 +113,14 @@ class Handler(BaseHTTPRequestHandler):
                 destination.write_text(raw)
                 return self.send(200, {"saved": "exports/" + destination.name})
             if path == "/api/simulate":
-                return self.send(200, compare(Scenario.parse(data.get("scenario", {}))))
+                return self.send(200, (compare_highway(HighwayScenario.parse(data["scenario"])) if data.get("scenario", {}).get("kind") == "highway" else compare(Scenario.parse(data.get("scenario", {})))))
             if path == "/api/counterfactuals":
                 return self.send(200, counterfactuals(Scenario.parse(data.get("scenario", {})), data.get("policy", "reactive")))
             if path == "/api/investigate":
+                if data.get("scene", "street") not in ("street", "highway"):
+                    raise ValueError("Choose Street or Highway.")
+                if data.get("scene") == "highway" and data.get("mode", "random") not in ("random", "ai"):
+                    raise ValueError("Highway supports random or AI search.")
                 if data.get("mode") == "ai" and not connection()["configured"]:
                     raise ValueError("Nebius is not connected. Open Connection for setup instructions. No AI calls were made.")
                 with LOCK:

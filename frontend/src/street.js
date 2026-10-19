@@ -92,12 +92,12 @@ export function createStreet(canvas) {
     box(scene, 45, 0.035, z, 4, 0.02, 0.46, "#eae9da");
   box(scene, 40.8, 0.03, -0.1, 0.22, 0.02, 3.4, "#efeee2");
   // Original procedural architecture: no downloaded models or third-party textures.
-  const colors = ["#b9b8aa", "#d0c3ac", "#94a7a7", "#b0b6a7", "#c5ad99"];
+  const colors = ["#d7c3a0", "#b5c8b5", "#c0b1c7", "#a7bdc8", "#d4aba0"];
   for (let i = 0; i < 19; i++)
     for (const side of [-1, 1]) {
       const x = -35 + i * 9.6,
         z = side * 14.5,
-        h = 8 + ((i * 7 + (side + 1) * 3) % 14);
+        h = i % 6 === 0 ? 19 : 9 + ((i * 7 + (side + 1) * 3) % 5);
       box(scene, x, h / 2, z, 8.9, h, 10, colors[(i + (side + 1)) % 5], true);
       box(scene, x, h + 0.15, z, 9.2, 0.3, 10.3, "#dfddd2");
       box(scene, x, 2, side * 9.39, 8.8, 3.5, 0.12, "#546662");
@@ -126,6 +126,15 @@ export function createStreet(canvas) {
             "#d9d8cb",
           );
         }
+      // San Francisco-inspired bay windows and cornices; original flat-street scenery.
+      for (let row = 0; row < Math.floor((h - 4) / 3); row++) {
+        const bayY = 5 + row * 3;
+        box(scene, x, bayY, side * 9.0, 2.8, 2.2, .85, colors[(i + (side + 1)) % 5]);
+        box(scene, x, bayY, side * 8.55, 1.9, 1.55, .08, '#496777');
+        box(scene, x, bayY - 1.15, side * 8.95, 3.15, .18, 1.15, '#efe7d6');
+        box(scene, x, bayY + 1.15, side * 8.95, 3.15, .18, 1.15, '#efe7d6');
+      }
+      box(scene, x, h - .3, side * 9.2, 9.3, .35, .8, '#efe7d6');
       if (i % 2 === 0) {
         box(
           scene,
@@ -155,6 +164,12 @@ export function createStreet(canvas) {
       cylinder(scene, x + 6, 3.1, side * 6, 0.055, 6.2, "#4a595b");
       box(scene, x + 6, 6.2, side * 5.65, 0.3, 0.15, 1, "#e6e4c9");
     }
+  // Curbside parking meters reinforce the parked-car context.
+  for (let x = -15; x < 120; x += 13) {
+    cylinder(scene, x, .65, -5.9, .045, 1.3, '#647573');
+    box(scene, x, 1.45, -5.9, .3, .4, .22, '#7f9490');
+    box(scene, x, 1.47, -5.76, .18, .16, .03, '#233e45');
+  }
   function vehicle(van = false, color = "#eeeee3") {
     const g = new THREE.Group(),
       length = van ? 5 : 4.2,

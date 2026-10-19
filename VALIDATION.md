@@ -65,3 +65,15 @@ Audio feedback was revised with a higher-frequency impact and contact noise for 
 ## Automatic AI replay
 
 Completed live AI investigations now load and play the first collision-containing case (or the first generated case if none collide), selecting a colliding controller and labeling the replay source. A browser check used the recorded AI result with mocked job/status responses and the real simulation endpoint: case 2 of 12 automatically loaded with its exact scenario inputs and no browser errors. No paid inference was performed. All 30 Python and 3 JavaScript tests and the frontend build pass. Render deployment remains unverified.
+
+## Street and Highway environments — 19 October 2026
+
+The two-option selector routes to separate Street and Highway test-design prompts, scenario schemas, simulation logic, and replay UIs. Street scenery now uses original San Francisco-inspired facades and parking meters; the street physics remains a flat crosswalk test. Highway adds moving traffic, continuous lane changes, a right exit, aggressive/exit-aware handwritten controllers, and measured lane-change/reversal/exit/collision metrics. Background vehicles follow prescribed speed waves and do not react to the ego vehicle.
+
+39 Python tests and 4 JavaScript tests pass. New checks cover highway determinism, recorded-input replay, shared traffic, continuous lateral motion, initial separation, strict AI proposals, measured history passed to the second AI round, hosted routing, shared Three.js chunk delivery, and interpolation by vehicle identity. A counterexample verifies that the exit-aware baseline can collide.
+
+Desktop/mobile browser checks passed for real random highway investigations, cameras, controller switching, case selection, separate saved highway history, returning to Street, and WebGL fallback. A mocked AI job with real simulated highway results verified prompt routing and automatic replay selection. Screenshots of Street and Highway were inspected. No browser JavaScript errors were observed in the passing checks. No new paid inference was performed; highway live Nebius inference is not yet verified.
+
+The default illustrative highway case has 7 lane changes and 4 direction reversals for the aggressive policy, versus 5 and 2 for exit-aware; both reach the exit. This is a selected demonstration case, not a performance benchmark. Existing AI-versus-random benchmark claims apply only to the historical Street run.
+
+The Docker build and local-container checks passed for health, authenticated compiled assets, highway simulation, and moving traffic. The new highway modules are included in both Dockerfile and its build-context allowlist. Public Render deployment remains unverified.

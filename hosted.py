@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from simulation import Scenario, VERSION, compare
+from highway import HighwayScenario, compare as compare_highway
 from investigation import connection, counterfactuals
 from server import JOBS, LOCK, ROOT, work
 
@@ -120,10 +121,14 @@ def application(environ, start_response):
                 raise ValueError("Expected a JSON artifact.")
             return send(200, {"download":data["artifact"]})
         if path == "/api/simulate":
-            return send(200, compare(Scenario.parse(data.get("scenario", {}))))
+            return send(200, (compare_highway(HighwayScenario.parse(data["scenario"])) if data.get("scenario", {}).get("kind") == "highway" else compare(Scenario.parse(data.get("scenario", {})))))
         if path == "/api/counterfactuals":
             return send(200, counterfactuals(Scenario.parse(data.get("scenario", {})), data.get("policy","reactive")))
         if path == "/api/investigate":
+            if data.get("scene", "street") not in ("street", "highway"):
+                raise ValueError("Choose Street or Highway.")
+            if data.get("scene") == "highway" and data.get("mode", "random") not in ("random", "ai"):
+                raise ValueError("Highway supports random or AI search.")
             mode = data.get("mode", "random")
             if mode not in ("random", "systematic", "ai", "held-out"):
                 raise ValueError("Unknown investigation method.")
