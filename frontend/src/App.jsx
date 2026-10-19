@@ -30,6 +30,7 @@ export default function App() {
     [pair, setPair] = useState(null),
     [dirty, setDirty] = useState(false),
     [replaySource, setReplaySource] = useState("Manual crosswalk scenario"),
+    [replayChanges, setReplayChanges] = useState(null),
     [simulating, setSimulating] = useState(false);
   const [policy, setPolicy] = useState("reactive"),
     [time, setTime] = useState(0),
@@ -82,7 +83,7 @@ export default function App() {
     };
   }, []);
   const simulate = useCallback(
-    async (s, auto = false, source = "Manual crosswalk scenario", preferredPolicy = null) => {
+    async (s, auto = false, source = "Manual crosswalk scenario", preferredPolicy = null, changes = null) => {
       const seq = ++sequence.current;
       setSimulating(true);
       try {
@@ -90,6 +91,7 @@ export default function App() {
         if (seq !== sequence.current || !active.current) return;
         setPair(result);
         setReplaySource(source);
+        setReplayChanges(changes);
         if (preferredPolicy) setPolicy(preferredPolicy);
         setDraft(result.reactive.scenario);
         setDirty(false);
@@ -192,9 +194,15 @@ export default function App() {
             const chosenPolicy = chosen?.reactive.collision ? "reactive"
               : chosen?.cautious.collision ? "cautious" : "reactive";
             setProgress("Investigation complete. Loading an AI-generated case into the replay…");
+            const labels = { speed_kmh: ["Vehicle speed", "km/h"], van_gap: ["Van gap", "m"], emerge_s: ["Pedestrian starts at", "s"], reaction_s: ["Reaction delay", "s"], ped_speed: ["Pedestrian speed", "m/s"], brake_mps2: ["Braking strength", "m/s²"], pedestrian: ["Pedestrian present", ""] };
+            const before = pair?.reactive.scenario || DEFAULTS;
+            const changes = chosen ? Object.entries(labels).filter(([key]) => before[key] !== chosen.scenario[key]).map(([key, [label, unit]]) => {
+              const display = (value) => typeof value === "boolean" ? (value ? "yes" : "no") : `${value} ${unit}`;
+              return `${label}: ${display(before[key])} → ${display(chosen.scenario[key])}`;
+            }) : [];
             const loaded = chosen && await simulate(chosen.scenario, true,
               `Live AI · case ${chosen.index} of ${rows.length} · ${chosen.reactive.collision || chosen.cautious.collision ? "first collision found" : "first generated case; no collisions found"}`,
-              chosenPolicy);
+              chosenPolicy, changes);
             setProgress(loaded
               ? `Completed ${state.result.budget} tests. Replaying AI case ${chosen.index}; explore the other cases in the notebook.`
               : "Investigation saved. Replay could not load; try opening a case from the notebook.");
@@ -212,7 +220,7 @@ export default function App() {
       }
     } catch (e) {
       if (e.name !== "AbortError" && active.current) {
-        setProgress("Investigation stopped. No successful run was recorded.");
+        setProgress(`Investigation stopped: ${e.message}. The previous replay is still displayed.`);
         notify(e.message, true);
       }
     } finally {
@@ -336,13 +344,25 @@ export default function App() {
               onChange={(e) => setConcern(e.target.value)}
             />
             <p className="field-help">
-              Describe a pedestrian-crossing concern, then click Start AI investigation.
+              Describe a pedestrian-crossing concern, then click Generate &amp; replay with AI.
               When it finishes, a generated case automatically plays in the replay.
               Typing alone does not change the scene.
               Lane changes, highway exits, and parking are not supported yet.
               Random and systematic searches do not use this text.
             </p>
+            <button
+              id="generateReplayBtn"
+              className="primary full"
+              disabled={busy || simulating}
+              onClick={() => { setMode("ai"); investigate("ai"); }}
+            >
+              {busy ? "Investigation running…" : "Generate & replay with AI"} <span>↗</span>
+            </button>
+            <p className="field-help">Uses Nebius credits. {connection.configured ? "" : aiUnavailable}</p>
+            {progress && <p className="job-progress" role="status">{progress}</p>}
             <div className="divider"></div>
+            <h3>Manual parameters</h3>
+            <p className="field-help">Adjust the controls below to replay a case without AI. These controls do not use the prompt above.</p>
             <div className="control">
               <label htmlFor="speed">
                 Vehicle speed{" "}
@@ -460,7 +480,7 @@ export default function App() {
               disabled={simulating}
               onClick={() => simulate(draft, true)}
             >
-              {dirty ? "Apply & run scenario" : "Run this scenario"}{" "}
+              Apply parameters &amp; replay{" "}
               <span>↗</span>
             </button>
             <button
@@ -473,6 +493,15 @@ export default function App() {
           </aside>
           <section className="center" id="replaySection">
             <p className="field-help" role="status" id="replaySource">{replaySource}{dirty ? " · unapplied parameter changes" : ""}</p>
+            {replayChanges !== null && (
+              <div className="job-progress" id="replayChanges" role="status">
+                <strong>Changes from the replay shown when you started this investigation</strong>
+                {replayChanges.length ? <ul>{replayChanges.map((change) => <li key={change}>{change}</li>)}</ul>
+                  : <p>This generated case has the same inputs as the previous replay. Choose another case in the notebook.</p>}
+                <p>The street layout stays fixed. The generated inputs control the van position, car motion, and pedestrian timing.</p>
+                <button className="text-btn" onClick={() => { setTime(0); setPlaying(true); }}>Replay this AI case ↻</button>
+              </div>
+            )}
             <Replay
               pair={pair}
               policy={policy}
