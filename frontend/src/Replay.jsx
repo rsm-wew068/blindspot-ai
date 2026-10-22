@@ -274,8 +274,8 @@ export default function Replay({
               </small>
             </div>
             <div className="hud-speed">
-              <strong id="hudSpeed">{(frame.v * 3.6).toFixed(0)}</strong>
-              <span>KM/H</span>
+              <strong id="hudSpeed">{(frame.v * 3.6 / (highway ? 1.609344 : 1)).toFixed(0)}</strong>
+              <span>{highway ? "MPH" : "KM/H"}</span>
               <small
                 id="hudBrake"
                 className={collision || frame.a < -0.1 ? "hazard" : ""}
