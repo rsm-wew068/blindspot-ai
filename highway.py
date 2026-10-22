@@ -18,7 +18,7 @@ class HighwayScenario:
     traffic_kmh: float = 85
     speed_variation: float = 23
     spacing_m: float = 85
-    exit_distance_m: float = 950
+    exit_distance_m: float = 10
     aggressiveness: float = 0.9
     traffic_phase: float = 3
 
