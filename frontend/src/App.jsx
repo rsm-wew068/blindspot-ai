@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Replay from "./Replay.jsx";
 import "./highway.css";
 const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:104.6074,traffic_kmh:85,speed_variation:23,spacing_m:85,exit_distance_m:10,aggressiveness:.9,traffic_phase:3};
-const HIGHWAY_FIELDS = [["speed_kmh","Target speed",40,100,1,"mph"],["traffic_kmh","Traffic speed",60,110,1,"km/h"],["speed_variation","Traffic speed variation",0,30,1,"km/h"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",0,1600,1,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
+const HIGHWAY_FIELDS = [["speed_kmh","Target speed",40,100,1,"mph"],["traffic_kmh","Traffic speed",60,110,1,"km/h"],["speed_variation","Traffic speed variation",0,30,1,"km/h"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",0,10,1,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
 
 import { Comparison, Notebook, Modal, Outcome } from "./components.jsx";
 const DEFAULTS = {
