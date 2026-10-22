@@ -8,7 +8,7 @@ from highway_investigation import investigate, propose, proposal_schema
 
 class HighwayTests(unittest.TestCase):
     def test_replay_and_summary_agree_and_are_deterministic(self):
-        scenario=HighwayScenario(exit_distance_m=950, speed_kmh=115)
+        scenario=HighwayScenario(exit_distance_m=950, speed_kmh=115, traffic_kmh=85, speed_variation=23, spacing_m=85, aggressiveness=.9)
         full=compare(scenario)
         self.assertEqual(full,compare(scenario))
         compact=compare(scenario,False)
@@ -23,7 +23,7 @@ class HighwayTests(unittest.TestCase):
         self.assertEqual(full['reactive']['id'],full['cautious']['id'])
 
     def test_traffic_and_lane_motion_are_continuous(self):
-        run=compare(HighwayScenario(exit_distance_m=950, speed_kmh=115))['reactive']
+        run=compare(HighwayScenario(exit_distance_m=950, speed_kmh=115, traffic_kmh=85, speed_variation=23, spacing_m=85, aggressiveness=.9))['reactive']
         moving=[f for f in run['frames'] if 0.1 < (f['y']/3.6)%1 < .9 and f['x']<950]
         self.assertTrue(moving,'Lane changes must include intermediate lateral positions')
         first,last=run['frames'][0],run['frames'][1]
@@ -38,7 +38,7 @@ class HighwayTests(unittest.TestCase):
             self.assertTrue(all(abs(c["x"])>=10 for c in cars if c["lane"]==1))
 
     def test_exit_aware_can_fail(self):
-        pair=compare(HighwayScenario(spacing_m=48, exit_distance_m=950, speed_kmh=115),False)
+        pair=compare(HighwayScenario(spacing_m=48, exit_distance_m=950, speed_kmh=115, traffic_kmh=85, speed_variation=23, aggressiveness=.9),False)
         self.assertTrue(pair['cautious']['metrics']['collision'])
         self.assertFalse(pair['cautious']['metrics']['exit_success'])
 

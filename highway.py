@@ -7,7 +7,7 @@ from simulation import intersects_box
 
 VERSION = 'blindspot-highway-1'
 DT = 0.1
-BOUNDS = {'speed_kmh': (64.3738, 160.9344), 'traffic_kmh': (60, 110), 'speed_variation': (0, 30),
+BOUNDS = {'speed_kmh': (64.3738, 160.9344), 'traffic_kmh': (60, 160.9344), 'speed_variation': (0, 32.1869),
           'spacing_m': (25, 90), 'exit_distance_m': (0, 1600), 'aggressiveness': (0.1, 1),
           'traffic_phase': (0, 30)}
 
@@ -15,11 +15,11 @@ BOUNDS = {'speed_kmh': (64.3738, 160.9344), 'traffic_kmh': (60, 110), 'speed_var
 class HighwayScenario:
     kind: str = 'highway'
     speed_kmh: float = 104.6074
-    traffic_kmh: float = 85
-    speed_variation: float = 23
-    spacing_m: float = 85
+    traffic_kmh: float = 104.6074
+    speed_variation: float = 8.0467
+    spacing_m: float = 60
     exit_distance_m: float = 10
-    aggressiveness: float = 0.9
+    aggressiveness: float = 0.5
     traffic_phase: float = 3
 
     @classmethod
