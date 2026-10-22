@@ -8,7 +8,7 @@ from simulation import intersects_box
 VERSION = 'blindspot-highway-1'
 DT = 0.1
 BOUNDS = {'speed_kmh': (80, 130), 'traffic_kmh': (60, 110), 'speed_variation': (0, 30),
-          'spacing_m': (25, 90), 'exit_distance_m': (350, 1600), 'aggressiveness': (0.1, 1),
+          'spacing_m': (25, 90), 'exit_distance_m': (0, 1600), 'aggressiveness': (0.1, 1),
           'traffic_phase': (0, 30)}
 
 @dataclass(frozen=True)
