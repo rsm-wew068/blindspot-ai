@@ -4,7 +4,7 @@ const settingLabels = {
   caution_distance_m: ['Start slowing near crossing', 'm'], caution_speed_factor: ['Caution speed factor', ''], visible_margin_m: ['Visible-conflict braking margin', 'm'],
 };
 export default function Improvement({scenario, concern, disabled, connected, request, setBusy, onReplay, connect}) {
-  const [report, setReport] = useState(null), [progress, setProgress] = useState(''), [running, setRunning] = useState(false);
+  const [investigation, setInvestigation] = useState(null), [report, setReport] = useState(null), [progress, setProgress] = useState(''), [running, setRunning] = useState(false);
   const abort = useRef(null), lock = useRef(false);
   useEffect(() => () => { abort.current?.abort(); }, []);
   async function improve() {
@@ -20,8 +20,8 @@ export default function Improvement({scenario, concern, disabled, connected, req
         const state = await request('/api/jobs/' + job.job_id, undefined, controller.signal);
         if (state.status === 'error') throw Error(state.error);
         if (state.status === 'done') {
-          setReport(state.result); setProgress('Analysis and simulation checks complete.');
-          onReplay(state.result, 'cautious'); break;
+          setInvestigation(state.result); setReport(state.result); setProgress('Analysis and simulation checks complete.');
+          onReplay(state.result, state.result.accepted ? 'cautious' : 'reactive'); break;
         }
         setProgress(state.progress?.message || 'Testing the proposed settings…');
       }
@@ -32,19 +32,33 @@ export default function Improvement({scenario, concern, disabled, connected, req
     }
   }
   function download() {
-    const compact = {...report};
-    for (const key of ['original','proposed']) { const {frames, ...rest} = report[key]; compact[key] = rest; }
+    function stripFrames(value) {
+      const compact = {...value};
+      for (const key of ['original','proposed']) { const {frames, ...rest} = value[key]; compact[key] = rest; }
+      if (value.attempts) compact.attempts = value.attempts.map(stripFrames);
+      return compact;
+    }
+    const compact = stripFrames(investigation || report);
     const url = URL.createObjectURL(new Blob([JSON.stringify(compact,null,2)], {type:'application/json'}));
     const a = document.createElement('a'); a.href=url; a.download='blindspot-controller-adjustment.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   return <section className="panel improvement" aria-label="Analyze and test a controller adjustment">
     <div className="panel-title"><h2>Understand the problem. Test a change.</h2><span className="tag">AI + SIMULATION</span></div>
-    <p>Analyze the {scenario.kind === 'highway' ? 'aggressive' : 'reactive'} baseline in the current replay. AI proposes controller settings; the simulator tests the same conditions and six additional cases.</p>
+    <p>Analyze the {scenario.kind === 'highway' ? 'aggressive' : 'reactive'} baseline in the current replay. AI proposes settings, tests the same conditions and six additional cases, then revises using measured results. Up to three attempts.</p>
     <button id="improveBtn" className="primary" disabled={disabled || running} onClick={improve}>{running ? 'Analyzing & testing…' : 'Analyze & test adjustment with AI'}</button>
-    <p className="field-help">One AI request using Nebius credits and one shared daily allowance slot. This does not modify vehicle software.</p>
+    <p className="field-help">Up to three AI requests using Nebius credits and one shared daily allowance slot. This does not modify vehicle software.</p>
     {progress && <p role="status">{progress}</p>}
     {report && <div id="improvementReport">
-      <h3>Measured result: {report.case_verdict}</h3>
+      {investigation?.attempts && <>
+        <h3>{investigation.accepted ? 'Candidate found for review' : 'No acceptable adjustment found'}</h3>
+        <p>{investigation.conclusion}</p>
+        <p>Stopped: {({acceptable_candidate:'current case improved with no measured regressions', budget_exhausted:'three-attempt budget exhausted', repeated_proposal:'AI repeated an already tested configuration', proposal_error:'a later proposal failed; earlier results retained'})[investigation.stop_reason]}.</p>
+        <div className="adjustment-actions" role="group" aria-label="Adjustment attempts">{investigation.attempts.map(attempt=><button key={attempt.attempt_number} className="quiet" disabled={disabled} aria-pressed={report.attempt_number === attempt.attempt_number} onClick={()=>{setReport(attempt);onReplay(attempt,'cautious');}}>
+          Attempt {attempt.attempt_number}: {attempt.case_verdict}{attempt.attempt_number === investigation.selected_attempt ? ' · selected' : ''}
+        </button>)}</div>
+        <details><summary>How the selected attempt was chosen</summary><p>{investigation.selection_rule}</p><p>These six cases guide revision, so they are development checks—not independent validation.</p></details>
+      </>}
+      <h3>Attempt {report.attempt_number || 1} · Measured result: {report.case_verdict}</h3>
       <p>Across this case and six checks: <strong>{report.overall_verdict}</strong>. A proposal is not a proven fix.</p>
       <h3>Observed baseline</h3>
       <p>{report.original.metrics.collision ? 'Collision recorded.' : 'No collision recorded.'} {report.original.metrics.missed_exit ? 'Exit missed.' : ''} {report.original.metrics.direction_reversals !== undefined ? `${report.original.metrics.direction_reversals} lane-direction reversals.` : ''}</p>

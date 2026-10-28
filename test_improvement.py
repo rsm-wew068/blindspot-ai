@@ -70,7 +70,8 @@ class ImprovementTests(unittest.TestCase):
             return {'choices':[{'message':{'content':json.dumps({'hypothesis':'Late braking may contribute','rationale':'Slow before the obstruction','settings':settings})}}], 'usage':{'total_tokens':1}}
         with patch('improvement.choose_model',return_value='test'),patch('improvement.api',side_effect=provider) as api:
             result=improve({'scenario':asdict(Scenario()),'metrics':{'collision':False}})
-            self.assertEqual(api.call_count,1)
+            self.assertEqual(api.call_count,2)
+            self.assertEqual(result["stop_reason"], "repeated_proposal")
             self.assertEqual(result['proposed_settings'],settings)
             self.assertEqual(result['model'],'test')
 
@@ -123,3 +124,53 @@ class ImprovementTests(unittest.TestCase):
             return {'choices':[{'message':{'content':json.dumps({'hypothesis':'Test hypothesis','rationale':'Inspect measured delay','settings':baseline(Scenario())})}}]}
         with patch('improvement.choose_model',return_value='test'),patch('improvement.api',side_effect=provider):
             improve({'scenario':asdict(Scenario())})
+
+    def test_loop_passes_measured_history_and_stops_at_three(self):
+        payloads=[]
+        def provider(path,payload):
+            evidence=json.loads(payload['messages'][1]['content']);payloads.append(evidence)
+            number=len(payloads)
+            self.assertEqual(len(evidence['previous_attempts']),number-1)
+            if number>1:
+                last=evidence['previous_attempts'][-1]
+                self.assertIn('decision_trace',last)
+                self.assertEqual(len(last['regressions']),6)
+                self.assertEqual(last['settings']['caution_distance_m'],10*number)
+            return {'choices':[{'message':{'content':json.dumps({'hypothesis':'Test earlier slowing','rationale':'Respond to regression measurements','settings':{'caution_distance_m':10*(number+1),'caution_speed_factor':.4,'visible_margin_m':10}})}}], 'usage':{'total_tokens':10}}
+        with patch('improvement.choose_model',return_value='test'),patch('improvement.api',side_effect=provider) as api:
+            result=improve({'scenario':asdict(Scenario())})
+        self.assertEqual(api.call_count,3)
+        self.assertEqual(len(result['attempts']),3)
+        self.assertEqual(result['stop_reason'],'budget_exhausted')
+        self.assertFalse(result['accepted'])
+        self.assertEqual(result['total_usage']['total_tokens'],30)
+        exported=compact_report(result)
+        for attempt in exported['attempts']:self.assertNotIn('frames',attempt['proposed'])
+        replay_report(exported)
+        exported['attempts'][0]['proposed']['metrics']['duration_s']+=1
+        with self.assertRaises(ValueError):replay_report(exported)
+
+    def test_loop_stops_on_acceptable_candidate(self):
+        report=evaluate(Scenario(),baseline(Scenario()))
+        report.update(case_verdict='improved',regression_counts={'improved':1,'mixed':0,'worse':0,'unchanged':5},hypothesis='h',rationale='r')
+        with patch('improvement.choose_model',return_value='test'),patch('improvement.propose_and_test',return_value=report) as propose:
+            result=improve({'scenario':asdict(Scenario())})
+        self.assertEqual(propose.call_count,1)
+        self.assertTrue(result['accepted'])
+        self.assertEqual(result['stop_reason'],'acceptable_candidate')
+
+    def test_later_provider_failure_preserves_prior_evidence(self):
+        report=evaluate(Scenario(),baseline(Scenario()));report.update(hypothesis='h',rationale='r')
+        with patch('improvement.choose_model',return_value='test'),patch('improvement.propose_and_test',side_effect=[report,ValueError('provider error')]):
+            result=improve({'scenario':asdict(Scenario())})
+        self.assertEqual(len(result['attempts']),1)
+        self.assertEqual(result['stop_reason'],'proposal_error')
+        self.assertFalse(result['accepted'])
+        self.assertEqual(result['proposed']['metrics'],report['proposed']['metrics'])
+
+    def test_candidate_ranking_prefers_fewer_collisions_not_latest_attempt(self):
+        from improvement import candidate_rank
+        good=evaluate(Scenario(),baseline(Scenario()));bad=deepcopy(good)
+        good['proposed']['metrics'].update(collision=False,finished=True)
+        bad['proposed']['metrics'].update(collision=True,finished=False)
+        self.assertLess(candidate_rank(good),candidate_rank(bad))
