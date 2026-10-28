@@ -108,6 +108,21 @@ class HostedTests(unittest.TestCase):
         self.assertTrue(status.startswith('200'))
         self.assertEqual(json.loads(body)['download'],payload['artifact'])
 
+    def test_improvement_uses_ai_gate_allowance_and_validates_before_reserving(self):
+        import server
+        server.JOBS.clear()
+        payload={'scenario':{'kind':'highway'},'concern':'Missed exit'}
+        self.assertTrue(self.call('/api/improve','POST',payload)[0].startswith('403'))
+        os.environ['BLINDSPOT_ENABLE_AI']='1'
+        with patch('hosted.connection',return_value={'configured':True}),patch('hosted.reserve_ai_run',return_value=False) as reserve:
+            self.assertTrue(self.call('/api/improve','POST',{'scenario':{'kind':'highway','speed_kmh':999}})[0].startswith('400'))
+            reserve.assert_not_called()
+            self.assertTrue(self.call('/api/improve','POST',payload)[0].startswith('429'))
+        with patch('hosted.connection',return_value={'configured':True}),patch('hosted.reserve_ai_run',return_value=True),patch('hosted.threading.Thread') as thread:
+            self.assertTrue(self.call('/api/improve','POST',payload)[0].startswith('202'))
+            self.assertEqual(thread.call_args.kwargs['args'][1]['task'],'improve')
+        server.JOBS.clear()
+
 
 if __name__=='__main__':
     unittest.main()

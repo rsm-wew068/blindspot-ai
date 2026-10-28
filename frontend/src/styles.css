@@ -1300,3 +1300,10 @@ code {
 @media(max-width:700px) { .impact-label { bottom:154px; padding:10px 12px; } }
 
 .street-note { margin:0; padding:0 18px 12px; font-size:10px; color:#788078; }
+
+.improvement { padding: 24px; margin-top: 18px; }
+.improvement p { line-height: 1.6; margin: 12px 0; }
+.improvement h3 { margin-top: 24px; }
+.adjustment-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.improvement pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.table-scroll { overflow-x: auto; }

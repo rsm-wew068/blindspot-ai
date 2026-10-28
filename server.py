@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 from frontend_assets import frontend_asset
 from simulation import Scenario, VERSION, compare
 from highway import HighwayScenario, compare as compare_highway
+from improvement import parse_request as parse_improvement
 from investigation import connection, counterfactuals, held_out, investigate
 
 ROOT = Path(__file__).resolve().parent
@@ -34,7 +35,10 @@ def work(job_id, data):
         with LOCK:
             JOBS[job_id]["progress"] = value
     try:
-        if data.get("scene") == "highway":
+        if data.get("task") == "improve":
+            from improvement import improve
+            result = improve(data, progress)
+        elif data.get("scene") == "highway":
             from highway_investigation import investigate as investigate_highway
             result = investigate_highway(data.get("mode", "random"), data.get("seed", 17), data.get("budget", 12), data.get("concern", ""), progress)
         elif data.get("mode") == "held-out":
@@ -116,7 +120,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, (compare_highway(HighwayScenario.parse(data["scenario"])) if data.get("scenario", {}).get("kind") == "highway" else compare(Scenario.parse(data.get("scenario", {})))))
             if path == "/api/counterfactuals":
                 return self.send(200, counterfactuals(Scenario.parse(data.get("scenario", {})), data.get("policy", "reactive")))
-            if path == "/api/investigate":
+            if path in ("/api/investigate", "/api/improve"):
+                if path == "/api/improve":
+                    scenario, concern = parse_improvement(data)
+                    data = {"task":"improve", "mode":"ai", "budget":4, "seed":17, "scenario":data["scenario"], "concern":concern, "scene":"highway" if getattr(scenario, "kind", None) == "highway" else "street"}
+                else:
+                    data.pop("task", None)
                 if data.get("scene", "street") not in ("street", "highway"):
                     raise ValueError("Choose Street or Highway.")
                 if data.get("scene") == "highway" and data.get("mode", "random") not in ("random", "ai"):

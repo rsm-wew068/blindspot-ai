@@ -1,10 +1,8 @@
 # BlindSpot
 
-A working prototype for investigating autonomous-driving controller behavior in two environments: **Street** and **Highway**. Each has a dedicated AI test-design prompt, bounded scenario schema, deterministic simulator, and Three.js replay. Driving controllers are handwritten experimental baselines, not trained prediction models or Tesla FSD.
+A developer workspace for reproducing driving-controller failures, inspecting measured evidence, and evaluating AI-proposed controller adjustments in simplified Street and Highway simulations.
 
-## Choose an environment
-
-Use the **Street / Highway** selector inside **Live replay**, immediately above the scene. Both environments share the same scenario-lab layout, prompt workflow, replay controls, comparison table, and investigation notebook. Switching environments replaces the scene in the same persistent canvas; the page, prompt text, camera choice, sound setting, and playback speed remain in place. Supported parameters and controller labels reflect the selected simulation.
+The prompt selects the environment when you submit **Generate & replay with AI**: highway/freeway/interstate/motorway selects Highway; other text defaults to Street. Typing leaves the replay unchanged. A successful run updates the same replay viewport.
 
 | Environment | What the AI can vary | Controller comparison |
 | --- | --- | --- |
@@ -20,6 +18,18 @@ Highway has three lanes, moving vehicles, a right-side exit, continuous two-seco
 Example highway concern: “Investigate repeated left–right lane changes near a right-side exit when the controller aggressively prioritizes speed.” The selected replay is the generated case with the most aggressive-controller reversals, not a representative or statistically validated sample. It may not collide or miss the exit.
 
 Highway live inference is wired to the existing Nebius connection but has only been tested with mocked provider responses; no new paid model calls were made for this addition. The earlier live AI benchmark applies to Street only.
+
+## Analyze and test a controller adjustment
+
+After loading a manual or generated case, click **Analyze & test adjustment with AI** below the replay comparison. This makes one Nebius model request and uses one hosted daily allowance slot.
+
+1. The server recomputes the reactive/aggressive baseline and sends its measured events, metrics, scenario and allowed settings to the model.
+2. AI returns a hypothesis and rationale plus a strict JSON controller configuration. Unsupported settings, non-finite values and out-of-range values are rejected. No model-generated code executes.
+3. The simulator runs the original and proposed controller on identical inputs, then tests six fixed additional cases. Highway changes exit preparation, lane-change cooldown and required speed benefit. Street changes precautionary slowing distance, speed factor and visible-conflict braking margin. Physics, reaction delay, traffic and pedestrian behavior stay fixed within each pair.
+4. The same replay displays **Original controller** and **Proposed adjustment**, with metric comparisons. Results are **improved**, **mixed**, **worse** or **unchanged**; safety and completion take precedence, and time/comfort tradeoffs are reported.
+5. **Export developer report** downloads the exact settings, inputs, metrics, AI hypothesis and regression evidence. Recompute without inference using `python3 replay.py path/to/blindspot-controller-adjustment.json`.
+
+The six checks are a small, fixed synthetic suite, not independent validation. AI hypotheses are not proven causes. A 10 m exit scenario can remain impossible to resolve by tuning controller settings; the app does not move the exit to manufacture success. Changes apply only to the built-in controller, not external vehicle software. The adjustment workflow has been verified with mocked model responses and real simulations; live provider output is not yet verified.
 
 ## Project status
 

@@ -11,10 +11,10 @@ export function Outcome({ metrics: m }) {
   return (
     <span
       className={
-        "pill " + (m.collision ? "bad" : m.finished ? "good" : "neutral")
+        "pill " + (m.collision || m.missed_exit ? "bad" : m.finished ? "good" : "neutral")
       }
     >
-      {m.collision ? "COLLISION" : m.finished ? "COMPLETED" : "TIME LIMIT"}
+      {m.collision ? "COLLISION" : m.missed_exit ? "MISSED EXIT" : m.finished ? "COMPLETED" : "TIME LIMIT"}
     </span>
   );
 }
@@ -37,8 +37,8 @@ export function Comparison({ pair, inspect, loading, highway = false }) {
             <thead>
               <tr>
                 <th>MEASUREMENT</th>
-                <th>{highway ? "AGGRESSIVE" : "REACTIVE"}</th>
-                <th>{highway ? "EXIT-AWARE" : "OCCLUSION-AWARE"}</th>
+                <th>{pair.labels?.reactive || (highway ? "AGGRESSIVE" : "REACTIVE")}</th>
+                <th>{pair.labels?.cautious || (highway ? "EXIT-AWARE" : "OCCLUSION-AWARE")}</th>
               </tr>
             </thead>
             <tbody>
@@ -64,7 +64,7 @@ export function Comparison({ pair, inspect, loading, highway = false }) {
       </div>
       <div className="comparison-footer">
         <span>Rule-based controllers · identical conditions</span>
-        {!highway && <button
+        {!highway && !pair?.labels && <button
           id="counterBtn"
           className="text-btn"
           disabled={!pair || loading}

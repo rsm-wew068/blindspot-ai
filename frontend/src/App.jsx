@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Replay from "./Replay.jsx";
+import Improvement from "./Improvement.jsx";
 import { environmentForPrompt } from "./environment.js";
 import "./highway.css";
 const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:104.6074,traffic_kmh:104.6074,speed_variation:8.0467,spacing_m:60,exit_distance_m:10,aggressiveness:.5,traffic_phase:3};
@@ -320,9 +321,9 @@ export default function App() {
             <h1>
               Find the failure.
               <br />
-              <span>Understand the why.</span>
+              <span>Test a possible fix.</span>
             </h1>
-            <p>Explore driving decisions through reproducible simulated scenarios.</p>
+            <p>Reproduce driving-controller failures, investigate the evidence, and evaluate AI-proposed adjustments.</p>
           </div>
           <div className="intro-note">
             <span className="note-number">01 /</span>
@@ -488,7 +489,7 @@ export default function App() {
             <button
               className="primary full"
               id="simulateBtn"
-              disabled={simulating}
+              disabled={simulating || busy}
               onClick={() => simulate(draft, true)}
             >
               Apply parameters &amp; replay{" "}
@@ -497,6 +498,7 @@ export default function App() {
             <button
               className="quiet full"
               id="resetBtn"
+              disabled={busy || simulating}
               onClick={() => simulate(defaults)}
             >
               Reset parameters
@@ -525,7 +527,14 @@ export default function App() {
               dirty={dirty}
               notify={notify}
             />
-            <Comparison pair={pair} inspect={inspect} loading={inspecting} highway={highway} />
+            <Comparison pair={pair} inspect={inspect} loading={inspecting || busy} highway={highway} />
+            {pair && <Improvement key={JSON.stringify(pair.reactive.scenario)} scenario={pair.reactive.scenario} concern={concern}
+              disabled={busy || simulating || inspecting} connected={connection.configured} request={request} setBusy={setBusy}
+              connect={() => setDialog("connection")} onReplay={(report, selectedPolicy) => {
+                setPair({reactive:report.original, cautious:report.proposed, labels:{reactive:"Original controller", cautious:"Proposed adjustment"}, adjustmentReport:report});
+                setPolicy(selectedPolicy); setTime(0); setPlaying(true); setReplayChanges(null);
+                setReplaySource(`AI controller adjustment · measured result: ${report.case_verdict}`);
+              }} /> }
           </section>
           <aside className="panel investigator">
             <div className="panel-title">
@@ -653,7 +662,7 @@ export default function App() {
             <button
               id="exportAllBtn"
               className="outline"
-              disabled={!pair}
+              disabled={!pair || !!pair.adjustmentReport}
               onClick={() =>
                 download(
                   {

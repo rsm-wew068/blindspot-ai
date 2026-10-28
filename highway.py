@@ -54,10 +54,14 @@ def traffic(s, t):
     return cars
 
 
-def run(s, policy='reactive', replay=True):
+def run(s, policy='reactive', replay=True, controller=None):
     s = HighwayScenario.parse(asdict(s))
     if policy not in ('reactive', 'cautious'):
         raise ValueError('Unknown highway controller.')
+    if controller is not None:
+        from controller_settings import validate
+        controller = validate(controller, True)
+        if policy != 'reactive': raise ValueError('Adjustments use the reactive baseline.')
     x, v, y, lane = 0., s.speed_kmh / 3.6, 3.6, 1
     target, start_y, maneuver_start, last_change = 1, y, None, -100.
     changes = reversals = 0
@@ -88,16 +92,16 @@ def run(s, policy='reactive', replay=True):
             return True
         remaining = s.exit_distance_m - x
         if maneuver_start is None and remaining > 0:
-            cooldown = 0.8 if policy == 'reactive' else 6
+            cooldown = controller['lane_cooldown_s'] if controller is not None else (0.8 if policy == 'reactive' else 6)
             if t - last_change >= cooldown:
                 candidates = [k for k in (lane - 1, lane + 1) if 0 <= k <= 2 and safe(k)]
-                need_exit = remaining < (130 if policy == 'reactive' else max(400, v * 20))
+                need_exit = remaining < (controller['exit_prepare_m'] if controller is not None else (130 if policy == 'reactive' else max(400, v * 20)))
                 choice = lane
                 if need_exit:
                     if lane + 1 in candidates: choice = lane + 1
                 elif candidates:
                     best = max(candidates, key=lane_speed)
-                    threshold = (1.1 - s.aggressiveness) * 1.5 if policy == 'reactive' else 3.5
+                    threshold = controller['speed_gain_mps'] if controller is not None else ((1.1 - s.aggressiveness) * 1.5 if policy == 'reactive' else 3.5)
                     if lane_speed(best) > lane_speed(lane) + threshold: choice = best
                 if choice != lane:
                     direction = 1 if choice > lane else -1
@@ -142,9 +146,11 @@ def run(s, policy='reactive', replay=True):
             if replay: frames.append({'t':t,'x':x,'y':y,'v':v,'a':accel,'reason':reason,
                                       'traffic':[{'id':c['id'],'x':round(c['x'],3),'y':c['y']} for c in next_cars if abs(c['x']-x)<160]})
             break
-    canonical = json.dumps({'scenario':asdict(s),'version':VERSION},sort_keys=True)
+    identity = {'scenario':asdict(s),'version':VERSION}
+    if controller is not None: identity['controller'] = controller
+    canonical = json.dumps(identity,sort_keys=True)
     return {'id':hashlib.sha256(canonical.encode()).hexdigest()[:10], 'version':VERSION, 'scenario':asdict(s),
-            'policy':policy,'frames':frames,'events':events,'metrics':{
+            **({'controller': controller} if controller is not None else {}), 'policy':policy,'frames':frames,'events':events,'metrics':{
                 'collision':collision,'finished':finished,'impact_kmh':round(v*3.6,2) if collision else None,
                 'duration_s':round(t,2),'lane_changes':changes,'direction_reversals':reversals,
                 'exit_success':bool(exit_success) and finished,'missed_exit':exit_success is False,

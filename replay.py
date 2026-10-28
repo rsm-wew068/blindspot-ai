@@ -7,6 +7,11 @@ from highway import VERSION as HIGHWAY_VERSION, HighwayScenario, compare as comp
 
 
 def recompute(data):
+    if data.get('type') == 'controller-adjustment':
+        from improvement import replay_report
+        report = replay_report(data)
+        return [{'original':report['original'], 'proposed':report['proposed']}]
+
     cases = data.get('rows') if 'rows' in data else [data]
     if not isinstance(cases, list) or not cases:
         raise ValueError('No recorded cases found.')

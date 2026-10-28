@@ -76,7 +76,7 @@ def observe(s, x, v, t):
     return {"x": x, "speed": v, "crossing_x": CROSSING, "van": van, "pedestrian": ped}
 
 
-def control(observation, policy, cruise, braking, latency):
+def control(observation, policy, cruise, braking, latency, controller=None):
     """Two transparent baselines; these are rules, not trained driving models."""
     x, v = observation["x"], observation["speed"]
     front = x + CAR_HALF_LENGTH
@@ -87,13 +87,13 @@ def control(observation, policy, cruise, braking, latency):
         arrival = max(0, distance) / max(v, 0.5)
         projected_y = p["y"] + p["vy"] * arrival
         crossing_risk = abs(p["y"]) <= 1.3 or (p["vy"] < 0 and -2.2 <= projected_y <= 2.2)
-        if crossing_risk and distance <= stopping + 5:
+        if crossing_risk and distance <= stopping + (controller["visible_margin_m"] if controller is not None else 5):
             return -braking, "Visible pedestrian conflicts with the vehicle path"
     target = cruise
-    if policy == "cautious" and 0 < distance < 30:
+    if 0 < distance < (controller["caution_distance_m"] if controller is not None else (30 if policy == "cautious" else 0)):
         # Known road geometry only: maintain a small stopping distance near the obstruction.
         visibility_distance = max(1.5, distance - 10)
-        target = min(cruise, max(2.5, math.sqrt(2 * braking * visibility_distance) * 0.65))
+        target = min(cruise, max(2.5, math.sqrt(2 * braking * visibility_distance) * (controller["caution_speed_factor"] if controller is not None else 0.65)))
     if v > target + 0.1:
         return -min(braking, 3.5), "Slow for the obstructed crosswalk"
     if v < target - 0.1:
@@ -101,10 +101,14 @@ def control(observation, policy, cruise, braking, latency):
     return 0, "Maintain speed"
 
 
-def run(s, policy="reactive", replay=True):
+def run(s, policy="reactive", replay=True, controller=None):
     s = Scenario.parse(asdict(s))
     if policy not in ("reactive", "cautious"):
         raise ValueError("Unknown controller.")
+    if controller is not None:
+        from controller_settings import validate
+        controller = validate(controller, False)
+        if policy != "reactive": raise ValueError("Adjustments use the reactive baseline.")
     cruise = s.speed_kmh / 3.6
     x, v = 0.0, cruise
     queue = deque([(0, "Maintain speed")] * math.ceil(s.reaction_s / DT))
@@ -120,7 +124,7 @@ def run(s, policy="reactive", replay=True):
         if seen and first_seen is None:
             first_seen = t
             events.append({"t": t, "kind": "visible", "text": "Pedestrian first visible to controller"})
-        requested = control(obs, policy, cruise, s.brake_mps2, s.reaction_s)
+        requested = control(obs, policy, cruise, s.brake_mps2, s.reaction_s, controller)
         queue.append(requested)
         accel, reason = queue.popleft()
         if accel < -0.1 and v > 0.1 and first_brake is None:
@@ -158,9 +162,11 @@ def run(s, policy="reactive", replay=True):
             break
     if not collision and not finished:
         events.append({"t": t, "kind": "timeout", "text": "Time limit reached"})
-    canonical = json.dumps({"scenario": asdict(s), "version": VERSION}, sort_keys=True)
+    identity = {"scenario": asdict(s), "version": VERSION}
+    if controller is not None: identity["controller"] = controller
+    canonical = json.dumps(identity, sort_keys=True)
     return {"id": hashlib.sha256(canonical.encode()).hexdigest()[:10], "version": VERSION,
-            "scenario": asdict(s), "policy": policy, "frames": frames, "events": events,
+            **({"controller": controller} if controller is not None else {}), "scenario": asdict(s), "policy": policy, "frames": frames, "events": events,
             "metrics": {"collision": collision, "finished": finished, "impact_kmh": impact,
                         "duration_s": round(t, 3), "first_seen_s": first_seen, "first_brake_s": first_brake,
                         "min_clearance_m": 0 if collision else (round(min_clearance, 3) if s.pedestrian else None),

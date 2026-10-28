@@ -12,7 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=8080 BLINDSPOT_DATA_DIR=/d
 WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt && useradd --uid 10001 --create-home app && mkdir /data && chown app:app /data
-COPY --chown=app:app hosted.py server.py investigation.py simulation.py highway.py highway_investigation.py frontend_assets.py ./
+COPY --chown=app:app hosted.py server.py investigation.py simulation.py highway.py highway_investigation.py controller_settings.py improvement.py frontend_assets.py ./
 COPY --from=frontend-build --chown=app:app /frontend/dist ./frontend/dist
 USER app
 EXPOSE 8080

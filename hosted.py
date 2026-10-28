@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 
 from simulation import Scenario, VERSION, compare
 from highway import HighwayScenario, compare as compare_highway
+from improvement import parse_request as parse_improvement
 from investigation import connection, counterfactuals
 from server import JOBS, LOCK, ROOT, work
 
@@ -124,7 +125,12 @@ def application(environ, start_response):
             return send(200, (compare_highway(HighwayScenario.parse(data["scenario"])) if data.get("scenario", {}).get("kind") == "highway" else compare(Scenario.parse(data.get("scenario", {})))))
         if path == "/api/counterfactuals":
             return send(200, counterfactuals(Scenario.parse(data.get("scenario", {})), data.get("policy","reactive")))
-        if path == "/api/investigate":
+        if path in ("/api/investigate", "/api/improve"):
+            if path == "/api/improve":
+                scenario, concern = parse_improvement(data)
+                data = {"task":"improve", "mode":"ai", "budget":4, "seed":17, "scenario":data["scenario"], "concern":concern, "scene":"highway" if getattr(scenario, "kind", None) == "highway" else "street"}
+            else:
+                data.pop("task", None)
             if data.get("scene", "street") not in ("street", "highway"):
                 raise ValueError("Choose Street or Highway.")
             if data.get("scene") == "highway" and data.get("mode", "random") not in ("random", "ai"):

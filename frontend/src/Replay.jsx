@@ -202,9 +202,9 @@ export default function Replay({
               setTime(Math.min(time, pair?.[p].metrics.duration_s || 0));
             }}
           >
-            {p === "reactive"
+            {pair?.labels?.[p] || (p === "reactive"
               ? (highway ? "Aggressive controller" : "Reactive controller")
-              : (highway ? "Exit-aware controller" : "Occlusion-aware controller")}
+              : (highway ? "Exit-aware controller" : "Occlusion-aware controller"))}
           </button>
         ))}
       </div>
