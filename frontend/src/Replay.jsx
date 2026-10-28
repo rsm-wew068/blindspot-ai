@@ -11,8 +11,6 @@ const cameras = {
 };
 export default function Replay({
   scene,
-  setScene,
-  switchingDisabled,
   pair,
   policy,
   setPolicy,
@@ -72,6 +70,9 @@ export default function Replay({
     if (sound && enteredCollision(previous.current, current)) audio.current?.play() === false && notify('Audio is paused by the browser. Click Test sound to enable it.');
     previous.current = current;
   }, [run, time, playing, duration, collision, sound]);
+  useEffect(() => {
+    audio.current?.engine(sound && playing && !!frame && !end && !collision ? frame.v : null);
+  }, [sound, playing, frame?.v, end, collision]);
   latest.current = {
     frame,
     highway,
@@ -233,10 +234,9 @@ export default function Replay({
           Hidden area
         </label>
         <label><input id="impactSound" type="checkbox" checked={sound}
-          onChange={e => enableSound(e.target.checked)} /> Impact sound {sound ? "on" : "off"}</label>
+          onChange={e => enableSound(e.target.checked)} /> Engine & impact sound {sound ? "on" : "off"}</label>
         <button id="testImpactSound" className="text-btn" onClick={() => enableSound(true, true)}>Test sound ♪</button>
       </div>
-      <div className="replay-environment" role="group" aria-label="Replay environment"><span>ENVIRONMENT</span>{[["crosswalk","Street"],["highway","Highway"]].map(([value,label])=><button key={value} disabled={switchingDisabled} aria-pressed={scene===value} onClick={()=>setScene(value)}>{label}</button>)}<small>{highway ? "Moving traffic · right-side exit" : "Curbside cars are parked scenery"}</small></div>
       <div
         className={"canvas-wrap" + (use3d ? " street-active" : "")}
         id="sceneWrap"

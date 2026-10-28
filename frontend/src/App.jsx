@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Replay from "./Replay.jsx";
+import { environmentForPrompt } from "./environment.js";
 import "./highway.css";
 const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:104.6074,traffic_kmh:104.6074,speed_variation:8.0467,spacing_m:60,exit_distance_m:10,aggressiveness:.5,traffic_phase:3};
 const HIGHWAY_FIELDS = [["speed_kmh","Target speed",40,100,1,"mph"],["traffic_kmh","Traffic speed",40,100,1,"mph"],["speed_variation","Traffic speed variation",0,20,1,"mph"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",0,10,1,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
@@ -350,12 +351,13 @@ export default function App() {
               id="concern"
               maxLength="1000"
               value={concern}
-              onChange={(e) => setConcern(e.target.value)}
+              disabled={busy || inspecting}
+              onChange={(e) => { setConcern(e.target.value); setScene(environmentForPrompt(e.target.value)); }}
             />
             <p className="field-help">
               Describe your concern, then click Generate &amp; replay with AI.
               When it finishes, a generated case automatically plays in the replay.
-              Typing alone does not change the scene.{" "}
+              Mention highway or freeway to switch the scene; otherwise it defaults to Street. Generate a case to test your concern.{" "}
               {highway ? "Highway supports traffic, lane-change, and exit tests." : "Street supports pedestrian-crossing and occlusion tests."} Parking is not supported yet.
               {highway ? "Random search does not use this text." : "Random and systematic searches do not use this text."}
             </p>
@@ -515,8 +517,6 @@ export default function App() {
             )}
             <Replay
               scene={scene}
-              setScene={setScene}
-              switchingDisabled={busy || simulating || inspecting}
               pair={pair}
               policy={policy}
               setPolicy={setPolicy}

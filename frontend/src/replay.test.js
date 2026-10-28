@@ -48,3 +48,11 @@ test('highway replay interpolates lane motion and traffic by stable vehicle iden
   assert.equal(frame.traffic[0].x,22);assert.equal(frame.traffic[1].x,40);
   assert.deepEqual(highwayFrame(frames,5),frames[1]);
 });
+
+import { environmentForPrompt } from "./environment.js";
+test("prompt selects highway and falls back to street", () => {
+  for (const prompt of ["", "A pedestrian crosses the street", "A car on Broadway"])
+    assert.equal(environmentForPrompt(prompt), "crosswalk");
+  for (const prompt of ["HIGHWAY lane changes", "Take a freeway exit", "interstate traffic", "motorway"])
+    assert.equal(environmentForPrompt(prompt), "highway");
+});

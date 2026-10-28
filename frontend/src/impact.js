@@ -10,7 +10,27 @@ export function createImpactAudio() {
   const Context = window.AudioContext || window.webkitAudioContext;
   if (!Context) return null;
   const context = new Context();
+  // A quiet layered motor hum. Pitch follows simulated speed, not playback rate.
+  const engineGain = context.createGain();
+  engineGain.gain.value = 0;
+  engineGain.connect(context.destination);
+  const engineTones = [1, 2, 4].map((harmonic) => {
+    const tone = context.createOscillator();
+    const level = context.createGain();
+    tone.type = 'triangle';
+    level.gain.value = 1 / (harmonic * 3);
+    tone.connect(level); level.connect(engineGain); tone.start();
+    return {tone, level, harmonic};
+  });
   return {
+    engine(speed) {
+      const now = context.currentTime;
+      const active = speed !== null && Number.isFinite(speed);
+      const velocity = active ? Math.max(0, speed) : 0;
+      engineGain.gain.setTargetAtTime(active ? .10 : 0, now, .04);
+      for (const {tone, harmonic} of engineTones)
+        tone.frequency.setTargetAtTime((45 + Math.min(velocity, 50) * 2.8) * harmonic, now, .08);
+    },
     async resume() { await context.resume(); },
     play() {
       if (context.state !== 'running') return false;
@@ -44,6 +64,6 @@ export function createImpactAudio() {
       noise.onended = () => { noise.disconnect(); filter.disconnect(); noiseGain.disconnect(); };
       return true;
     },
-    close() { void context.close().catch(() => {}); },
+    close() { for (const {tone, level} of engineTones) { tone.stop(); tone.disconnect(); level.disconnect(); } engineGain.disconnect(); void context.close().catch(() => {}); },
   };
 }
