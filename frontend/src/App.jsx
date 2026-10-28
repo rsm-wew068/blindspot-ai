@@ -62,7 +62,6 @@ export default function App() {
     return {crosswalk:read("blindspot-runs-v1"), highway:read("blindspot-highway-runs-v1")};
   });
   const runs = histories[scene];
-  const setRuns = update => setHistories(current=>({...current,[scene]:typeof update === "function" ? update(current[scene]) : update}));
   const notebookRef = useRef(null),
     sequence = useRef(0),
     toastTimer = useRef(null),
@@ -93,6 +92,7 @@ export default function App() {
       try {
         const result = await request("/api/simulate", { scenario: s });
         if (seq !== sequence.current || !active.current) return;
+        setScene(s.kind === "highway" ? "highway" : "crosswalk");
         setPair(result);
         setReplaySource(source || (s.kind === "highway" ? "Manual highway scenario" : "Manual crosswalk scenario"));
         setReplayChanges(changes);
@@ -129,10 +129,8 @@ export default function App() {
     };
   }, [simulate, notify]);
   useEffect(() => {
-    setPlaying(false);setTime(0);setPair(null);setDraft(defaults);setDirty(false);setProgress("");setReplayChanges(null);setDialog(null);setPolicy("reactive");
-    setMode(current=>highway && current === "systematic" ? "ai" : current);
-    simulate(defaults);
-  }, [defaults, highway, simulate]);
+    simulate(DEFAULTS);
+  }, [simulate]);
   function edit(key, value) {
     setDraft((s) => ({ ...s, [key]: value }));
     setDirty(true);
@@ -159,6 +157,9 @@ export default function App() {
   }
   async function investigate(selected) {
     if (runLock.current) return;
+    const investigationScene = selected === "ai" ? environmentForPrompt(concern) : scene;
+    const highway = investigationScene === "highway";
+    const defaults = highway ? HIGHWAY_DEFAULTS : DEFAULTS;
     if (selected === "ai" && !connection.configured) {
       setDialog("connection");
       return;
@@ -193,10 +194,7 @@ export default function App() {
         );
         if (state.status === "error") throw Error(state.error);
         if (state.status === "done") {
-          setRuns((current) => {
-            const next = [state.result, ...current].slice(0, 8);
-            return next;
-          });
+          setHistories(current => ({...current, [investigationScene]: [state.result, ...current[investigationScene]].slice(0, 8)}));
           if (selected === "ai") {
             const rows = state.result.rows;
             const chosen = highway ? rows.reduce((best,row)=>row.reactive.direction_reversals>best.reactive.direction_reversals?row:best,rows[0]) : rows.find((row) => row.reactive.collision || row.cautious.collision) || rows[0];
@@ -204,7 +202,7 @@ export default function App() {
               : chosen?.cautious.collision ? "cautious" : "reactive";
             setProgress("Investigation complete. Loading an AI-generated case into the replay…");
             const labels = highway ? Object.fromEntries(HIGHWAY_FIELDS.map(field=>[field[0],[field[1],field[5]]])) : { speed_kmh: ["Vehicle speed", "km/h"], van_gap: ["Van gap", "m"], emerge_s: ["Pedestrian starts at", "s"], reaction_s: ["Reaction delay", "s"], ped_speed: ["Pedestrian speed", "m/s"], brake_mps2: ["Braking strength", "m/s²"], pedestrian: ["Pedestrian present", ""] };
-            const before = pair?.reactive.scenario || defaults;
+            const before = scene === investigationScene ? pair?.reactive.scenario || defaults : defaults;
             const changes = chosen ? Object.entries(labels).filter(([key]) => before[key] !== chosen.scenario[key]).map(([key, [label, unit]]) => {
               const display = (value) => typeof value === "boolean" ? (value ? "yes" : "no") : `${unit === "mph" ? Number((value / 1.609344).toFixed(1)) : value} ${unit}`;
               return `${label}: ${display(before[key])} → ${display(chosen.scenario[key])}`;
@@ -352,12 +350,12 @@ export default function App() {
               maxLength="1000"
               value={concern}
               disabled={busy || inspecting}
-              onChange={(e) => { setConcern(e.target.value); setScene(environmentForPrompt(e.target.value)); }}
+              onChange={(e) => setConcern(e.target.value)}
             />
             <p className="field-help">
               Describe your concern, then click Generate &amp; replay with AI.
               When it finishes, a generated case automatically plays in the replay.
-              Mention highway or freeway to switch the scene; otherwise it defaults to Street. Generate a case to test your concern.{" "}
+              Mention highway or freeway for Highway; otherwise the investigation uses Street. Typing leaves the replay unchanged. Generate a case to update it.{" "}
               {highway ? "Highway supports traffic, lane-change, and exit tests." : "Street supports pedestrian-crossing and occlusion tests."} Parking is not supported yet.
               {highway ? "Random search does not use this text." : "Random and systematic searches do not use this text."}
             </p>
