@@ -76,17 +76,27 @@ def observe(s, x, v, t):
     return {"x": x, "speed": v, "crossing_x": CROSSING, "van": van, "pedestrian": ped}
 
 
-def control(observation, policy, cruise, braking, latency, controller=None):
+def control(observation, policy, cruise, braking, latency, controller=None, trace=None):
     """Two transparent baselines; these are rules, not trained driving models."""
     x, v = observation["x"], observation["speed"]
     front = x + CAR_HALF_LENGTH
     distance = observation["crossing_x"] - front - PED_RADIUS
     stopping = v * latency + v * v / (2 * braking) + 1.5
     p = observation["pedestrian"]
+    margin = controller["visible_margin_m"] if controller is not None else 5
+    caution_distance = controller["caution_distance_m"] if controller is not None else (30 if policy == "cautious" else 0)
+    if trace is not None:
+        trace.update(visible=p is not None, pedestrian_y=p["y"] if p else None,
+                     pedestrian_vy=p["vy"] if p else None, distance_m=round(distance, 4),
+                     stopping_distance_m=round(stopping, 4), arrival_s=None, projected_y=None,
+                     conflict=False, within_braking_margin=distance <= stopping + margin,
+                     caution_active=0 < distance < caution_distance)
     if p and -1.3 <= p["y"] <= 5.6 and x - CAR_HALF_LENGTH < p["x"] + PED_RADIUS:
         arrival = max(0, distance) / max(v, 0.5)
         projected_y = p["y"] + p["vy"] * arrival
         crossing_risk = abs(p["y"]) <= 1.3 or (p["vy"] < 0 and -2.2 <= projected_y <= 2.2)
+        if trace is not None:
+            trace.update(arrival_s=round(arrival, 4), projected_y=round(projected_y, 4), conflict=crossing_risk)
         if crossing_risk and distance <= stopping + (controller["visible_margin_m"] if controller is not None else 5):
             return -braking, "Visible pedestrian conflicts with the vehicle path"
     target = cruise
@@ -112,7 +122,9 @@ def run(s, policy="reactive", replay=True, controller=None):
     cruise = s.speed_kmh / 3.6
     x, v = 0.0, cruise
     queue = deque([(0, "Maintain speed")] * math.ceil(s.reaction_s / DT))
-    frames, events = [], []
+    frames, events, decision_trace = [], [], []
+    first_conflict = first_requested_brake = None
+    previous_decision = None
     first_seen = first_brake = None
     min_clearance, hard_brakes = float("inf"), 0
     last_hard, collision, finished = False, False, False
@@ -124,9 +136,17 @@ def run(s, policy="reactive", replay=True, controller=None):
         if seen and first_seen is None:
             first_seen = t
             events.append({"t": t, "kind": "visible", "text": "Pedestrian first visible to controller"})
-        requested = control(obs, policy, cruise, s.brake_mps2, s.reaction_s, controller)
+        decision = {"t": t}
+        requested = control(obs, policy, cruise, s.brake_mps2, s.reaction_s, controller, decision)
+        if decision["conflict"] and first_conflict is None: first_conflict = t
+        if requested[0] < -.1 and v > .1 and first_requested_brake is None: first_requested_brake = t
         queue.append(requested)
         accel, reason = queue.popleft()
+        decision.update(requested_accel=requested[0], applied_accel=accel, requested_reason=requested[1], applied_reason=reason)
+        signature = tuple(decision[k] for k in ('visible','conflict','within_braking_margin','caution_active','requested_reason','applied_reason'))
+        if signature != previous_decision or step % 20 == 0:
+            decision_trace.append(decision)
+        previous_decision = signature
         if accel < -0.1 and v > 0.1 and first_brake is None:
             first_brake = t
             events.append({"t": t, "kind": "brake", "text": reason})
@@ -162,11 +182,15 @@ def run(s, policy="reactive", replay=True, controller=None):
             break
     if not collision and not finished:
         events.append({"t": t, "kind": "timeout", "text": "Time limit reached"})
+    if decision_trace[-1]["t"] != decision["t"]: decision_trace.append(decision)
+    trace_summary = {"first_conflict_s": first_conflict, "first_requested_brake_s": first_requested_brake,
+                     "first_applied_brake_s": first_brake, "reaction_delay_s": s.reaction_s,
+                     "sampling": "Decision-state transitions plus 0.5 s samples; signals are from the controller observation, not hidden simulator truth."}
     identity = {"scenario": asdict(s), "version": VERSION}
     if controller is not None: identity["controller"] = controller
     canonical = json.dumps(identity, sort_keys=True)
     return {"id": hashlib.sha256(canonical.encode()).hexdigest()[:10], "version": VERSION,
-            **({"controller": controller} if controller is not None else {}), "scenario": asdict(s), "policy": policy, "frames": frames, "events": events,
+            **({"controller": controller} if controller is not None else {}), "scenario": asdict(s), "policy": policy, "frames": frames, "events": events, "decision_trace": decision_trace, "trace_summary": trace_summary,
             "metrics": {"collision": collision, "finished": finished, "impact_kmh": impact,
                         "duration_s": round(t, 3), "first_seen_s": first_seen, "first_brake_s": first_brake,
                         "min_clearance_m": 0 if collision else (round(min_clearance, 3) if s.pedestrian else None),

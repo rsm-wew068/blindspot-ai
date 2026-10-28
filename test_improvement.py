@@ -81,3 +81,45 @@ class ImprovementTests(unittest.TestCase):
                 with patch('improvement.choose_model',return_value='test'),patch('improvement.api',return_value=reply),patch('improvement.evaluate') as evaluation:
                     with self.assertRaises(ValueError):improve({'scenario':asdict(Scenario())})
                     evaluation.assert_not_called()
+
+    def test_reported_collision_has_a_late_command_not_absent_detection(self):
+        s=Scenario(speed_kmh=55,van_gap=1,emerge_s=.5,ped_speed=2.5,reaction_s=1,brake_mps2=3)
+        report=evaluate(s,{'caution_distance_m':0,'caution_speed_factor':.4,'visible_margin_m':8})
+        original=report['original']
+        self.assertEqual(original['metrics']['duration_s'],2.8)
+        self.assertTrue(original['metrics']['collision'])
+        self.assertEqual(original['trace_summary']['first_conflict_s'],1.8)
+        self.assertEqual(original['trace_summary']['first_requested_brake_s'],1.8)
+        self.assertIsNone(original['trace_summary']['first_applied_brake_s'])
+        hidden=[d for d in original['decision_trace'] if not d['visible']]
+        self.assertEqual(hidden[0]['t'],.075)
+        for d in hidden:
+            self.assertIsNone(d['pedestrian_y'])
+            self.assertIsNone(d['projected_y'])
+            self.assertFalse(d['conflict'])
+        self.assertEqual(len(report['proposal_warnings']),2)
+        self.assertTrue(any('1.8 s' in finding for finding in report['engineering_findings']))
+
+    def test_applied_brake_trace_matches_delay_and_events(self):
+        result=street_run(Scenario(reaction_s=.3))
+        summary=result['trace_summary']
+        self.assertAlmostEqual(summary['first_applied_brake_s']-summary['first_requested_brake_s'],.3)
+        first=next(d for d in result['decision_trace'] if d['applied_accel'] < -.1)
+        self.assertEqual(first['t'],result['metrics']['first_brake_s'])
+
+    def test_trace_available_without_replay_frames_and_exported(self):
+        result=street_run(Scenario(),replay=False)
+        self.assertEqual(result['frames'],[])
+        self.assertTrue(result['decision_trace'])
+        report=compact_report(evaluate(Scenario(),baseline(Scenario())))
+        self.assertTrue(report['original']['decision_trace'])
+
+    def test_ai_prompt_includes_trace_and_warns_about_disabled_slowing(self):
+        def provider(path,payload):
+            evidence=json.loads(payload['messages'][1]['content'])
+            self.assertTrue(evidence['decision_trace'])
+            self.assertIn('first_requested_brake_s',evidence['trace_summary'])
+            self.assertIn('DISABLES',payload['messages'][0]['content'])
+            return {'choices':[{'message':{'content':json.dumps({'hypothesis':'Test hypothesis','rationale':'Inspect measured delay','settings':baseline(Scenario())})}}]}
+        with patch('improvement.choose_model',return_value='test'),patch('improvement.api',side_effect=provider):
+            improve({'scenario':asdict(Scenario())})

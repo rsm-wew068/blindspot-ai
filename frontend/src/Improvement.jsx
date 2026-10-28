@@ -49,6 +49,16 @@ export default function Improvement({scenario, concern, disabled, connected, req
       <h3>Observed baseline</h3>
       <p>{report.original.metrics.collision ? 'Collision recorded.' : 'No collision recorded.'} {report.original.metrics.missed_exit ? 'Exit missed.' : ''} {report.original.metrics.direction_reversals !== undefined ? `${report.original.metrics.direction_reversals} lane-direction reversals.` : ''}</p>
       <details><summary>Measured event timeline</summary><ul>{report.original.events.map((event,i)=><li key={i}>{event.t.toFixed(2)} s — {event.text}</li>)}</ul></details>
+      {report.engineering_findings?.length > 0 && <><h3>Measured decision trace</h3>
+        <ul>{report.engineering_findings.map((finding,i)=><li key={i}>{finding}</li>)}</ul>
+        <p className="field-help">Controller observations and decisions, not an AI-generated explanation. Hidden pedestrian positions are not supplied to the controller.</p>
+        {['original','proposed'].map(key=><details key={key}><summary>{key === 'original' ? 'Original controller' : 'Proposed adjustment'}: inspect prediction → command → applied braking</summary>
+          <div className="table-scroll"><table className="metric-table"><thead><tr><th>Time (s)</th><th>Visible</th><th>Predicted lateral position at arrival (m)</th><th>Conflict</th><th>Requested acceleration (m/s²)</th><th>Applied acceleration (m/s²)</th></tr></thead><tbody>
+            {report[key].decision_trace?.map((row,i)=><tr key={i}><td>{row.t.toFixed(3)}</td><td>{row.visible ? 'Yes' : 'No'}</td><td>{row.projected_y == null ? '—' : row.projected_y.toFixed(2)}</td><td>{row.conflict ? 'Yes' : 'No'}</td><td>{row.requested_accel.toFixed(2)}</td><td>{row.applied_accel.toFixed(2)}</td></tr>)}
+          </tbody></table></div><p className="field-help">{report[key].trace_summary?.sampling} Negative acceleration means braking.</p>
+        </details>)}
+      </>}
+      {report.proposal_warnings?.length > 0 && <><h3>Proposal limitations detected by the simulator</h3><ul>{report.proposal_warnings.map((warning,i)=><li key={i}>{warning}</li>)}</ul></>}
       <h3>AI hypothesis — requires investigation</h3><p>{report.hypothesis}</p>
       <h3>Proposed adjustment</h3><p>{report.rationale}</p>
       <div className="table-scroll"><table className="metric-table"><thead><tr><th>Controller setting</th><th>Original</th><th>Proposed</th></tr></thead><tbody>
