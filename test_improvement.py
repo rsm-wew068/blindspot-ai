@@ -80,7 +80,7 @@ class ImprovementTests(unittest.TestCase):
         for values in [dict(baseline(Scenario()),caution_distance_m=46),dict(baseline(Scenario()),caution_distance_m=math.nan),dict(baseline(Scenario()),visible_margin_m=True),{'code':'anything'}]:
             with self.subTest(values=values):
                 reply={'choices':[{'message':{'content':json.dumps({'hypothesis':'x','rationale':'y','settings':values})}}]}
-                with patch('improvement.choose_model',return_value='test'),patch('improvement.api',return_value=reply),patch('improvement.evaluate') as evaluation:
+                with patch('improvement.choose_model',return_value='test'),patch('improvement.api',return_value=reply),patch('improvement.reference_checks',return_value=[]),patch('improvement.evaluate') as evaluation:
                     with self.assertRaises(ValueError):improve({'scenario':asdict(Scenario())})
                     evaluation.assert_not_called()
 

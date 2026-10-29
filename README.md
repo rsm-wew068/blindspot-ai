@@ -147,3 +147,7 @@ Scenario generation allows one repair request per batch (at most four model call
 ### Live verification — 29 October 2026
 
 A real Nebius run of the revised code completed a 12-scenario pedestrian investigation and three adjustment proposals. Two proposals changed the trajectory; one lowered impact speed from 28.8 to 8.59 km/h, but all still collided and none passed the additional checks without regressions. This is a completed workflow, not a successful controller fix. See `examples/live-adjustment-20261029.json`; replay it with `python3 replay.py examples/live-adjustment-20261029.json`. The invalid-response repair paths are covered by automated tests; the successful live generation run did not need a repair.
+
+The adjustment agent also receives three fixed simulator reference probes (early-slowing settings on Street; earlier exit preparation on Highway). Their measured original-case and regression outcomes are labeled separately from AI proposals in the report. They require no model calls and are guidance, not guaranteed fixes.
+
+A second real Nebius run with reference-probe evidence produced three proposals: attempts 1 and 2 avoided the default Street collision; attempt 2 moved first applied braking from 2.65 s to 0.525 s. Additional checks still regressed, so no proposal was accepted overall. All three produced different vehicle trajectories. Reproduce `examples/live-reference-adjustment-20261029.json` with the replay CLI.

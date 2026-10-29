@@ -40,3 +40,14 @@ class ModelOutputTests(unittest.TestCase):
         with patch('improvement.choose_model',return_value='test'),patch('improvement.propose_and_test',side_effect=InvalidProposal('Bad JSON')) as call:
             with self.assertRaisesRegex(ValueError,'three requests'):improve({'scenario':asdict(Scenario())})
         self.assertEqual(call.call_count,3)
+
+    def test_reference_probes_are_measured_and_labeled_not_ai(self):
+        from improvement import reference_checks
+        rows=reference_checks(Scenario())
+        self.assertEqual(len(rows),3)
+        self.assertTrue(any(not row['metrics']['collision'] for row in rows))
+        for row in rows:
+            self.assertIn('not an AI proposal',row['source'])
+            actual=evaluate(Scenario(),row['settings'])
+            self.assertEqual(row['metrics'],actual['proposed']['metrics'])
+            self.assertEqual(row['regression_counts'],actual['regression_counts'])
