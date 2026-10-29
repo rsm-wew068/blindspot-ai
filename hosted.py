@@ -151,7 +151,7 @@ def application(environ, start_response):
                 if os.environ.get("BLINDSPOT_ENABLE_AI") != "1" or not connection()["configured"]:
                     return send(403, {"error":"Live AI is disabled on this deployment."})
                 if budget > 12:
-                    raise ValueError("Hosted AI runs are limited to 12 scenarios (two model calls).")
+                    raise ValueError("Hosted AI runs are limited to 12 scenarios (two batches, with at most one repair request per batch).")
             with LOCK:
                 if any(j["status"] == "running" for j in JOBS.values()):
                     return send(409, {"error":"An investigation is already running."})

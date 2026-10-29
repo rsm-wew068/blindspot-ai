@@ -23,6 +23,7 @@ class ImprovementTests(unittest.TestCase):
         self.assertEqual(report['original']['scenario'],report['proposed']['scenario'])
         self.assertNotEqual(report['original']['frames'],report['proposed']['frames'])
         self.assertEqual(report['proposed']['controller'],settings)
+        self.assertTrue(report['behavior_changed'])
         self.assertEqual(len(report['regressions']),6)
         self.assertEqual(sum(report['regression_counts'].values()),6)
         # Pedestrian trajectory is fixed despite changed vehicle motion.
@@ -99,6 +100,7 @@ class ImprovementTests(unittest.TestCase):
             self.assertIsNone(d['projected_y'])
             self.assertFalse(d['conflict'])
         self.assertEqual(len(report['proposal_warnings']),2)
+        self.assertFalse(report['behavior_changed'])
         self.assertTrue(any('1.8 s' in finding for finding in report['engineering_findings']))
 
     def test_applied_brake_trace_matches_delay_and_events(self):

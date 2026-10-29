@@ -52,7 +52,8 @@ export default function Improvement({scenario, concern, disabled, connected, req
       {investigation?.attempts && <>
         <h3>{investigation.accepted ? 'Candidate found for review' : 'No acceptable adjustment found'}</h3>
         <p>{investigation.conclusion}</p>
-        <p>Stopped: {({acceptable_candidate:'current case improved with no measured regressions', budget_exhausted:'three-attempt budget exhausted', repeated_proposal:'AI repeated an already tested configuration', proposal_error:'a later proposal failed; earlier results retained'})[investigation.stop_reason]}.</p>
+        <p>Stopped: {({acceptable_candidate:'current case improved with no measured regressions', budget_exhausted:'three-attempt budget exhausted', repeated_proposal:'AI repeated an already tested configuration', proposal_error:'request budget exhausted after invalid proposals; valid results retained'})[investigation.stop_reason]}.</p>
+        {investigation.failed_requests?.length > 0 && <details><summary>{investigation.failed_requests.length} invalid AI response(s) — no simulation executed for those requests</summary><ul>{investigation.failed_requests.map((failure,i)=><li key={i}>Request {failure.request}: {failure.reason}</li>)}</ul></details>}
         <div className="adjustment-actions" role="group" aria-label="Adjustment attempts">{investigation.attempts.map(attempt=><button key={attempt.attempt_number} className="quiet" disabled={disabled} aria-pressed={report.attempt_number === attempt.attempt_number} onClick={()=>{setReport(attempt);onReplay(attempt,'cautious');}}>
           Attempt {attempt.attempt_number}: {attempt.case_verdict}{attempt.attempt_number === investigation.selected_attempt ? ' · selected' : ''}
         </button>)}</div>
@@ -73,8 +74,15 @@ export default function Improvement({scenario, concern, disabled, connected, req
         </details>)}
       </>}
       {report.proposal_warnings?.length > 0 && <><h3>Proposal limitations detected by the simulator</h3><ul>{report.proposal_warnings.map((warning,i)=><li key={i}>{warning}</li>)}</ul></>}
-      <h3>AI hypothesis — requires investigation</h3><p>{report.hypothesis}</p>
-      <h3>Proposed adjustment</h3><p>{report.rationale}</p>
+      <h3>Verified before / after</h3>
+      <p><strong>{report.behavior_changed ? 'Vehicle motion changed.' : 'Vehicle motion is identical.'}</strong> {report.proposed.metrics.collision ? 'The proposed controller still collided; this is not a successful fix.' : 'The proposed controller did not collide in this case.'}</p>
+      {report.original.metrics.impact_kmh != null && <p>Impact speed: {report.original.metrics.impact_kmh} km/h → {report.proposed.metrics.impact_kmh == null ? 'No collision' : report.proposed.metrics.impact_kmh + ' km/h'}.</p>}
+      <p>Collision: {String(report.original.metrics.collision)} → {String(report.proposed.metrics.collision)}. Run ended at {report.original.metrics.duration_s} s → {report.proposed.metrics.duration_s} s.</p>
+      {report.original.trace_summary && <div className="table-scroll"><table className="metric-table"><thead><tr><th>Measured signal</th><th>Original (s)</th><th>Proposed (s)</th></tr></thead><tbody>
+        {[['Conflict detected','first_conflict_s'],['Braking requested','first_requested_brake_s'],['Braking applied','first_applied_brake_s']].map(([label,key])=><tr key={key}><td>{label}</td><td>{report.original.trace_summary[key] ?? 'Not recorded'}</td><td>{report.proposed.trace_summary[key] ?? 'Not recorded'}</td></tr>)}
+      </tbody></table></div>}
+      <details><summary>AI hypothesis and proposal notes — unverified interpretation</summary><p>These notes may contain mistakes. The measured signals above are authoritative; the notes do not determine the verdict.</p><p>{report.hypothesis}</p><p>{report.rationale}</p></details>
+      <h3>Controller settings tested</h3>
       <div className="table-scroll"><table className="metric-table"><thead><tr><th>Controller setting</th><th>Original</th><th>Proposed</th></tr></thead><tbody>
         {Object.entries(report.proposed_settings).map(([key,value])=><tr key={key}><td>{settingLabels[key]?.[0] || key}</td><td>{Number(report.baseline_settings[key].toFixed(2))} {settingLabels[key]?.[1]}</td><td>{Number(value.toFixed(2))} {settingLabels[key]?.[1]}</td></tr>)}
       </tbody></table></div>

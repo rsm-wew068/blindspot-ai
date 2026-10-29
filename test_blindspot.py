@@ -103,7 +103,7 @@ class InvestigationTests(unittest.TestCase):
     def test_model_cannot_set_outcome_or_execute_code(self):
         malicious = {"scenarios":[{"collision":False,"code":"print('bad')"}]*4,"hypothesis":"test"}
         with patch.object(investigation,"api",return_value={"choices":[{"message":{"content":json.dumps(malicious)}}]}):
-            with self.assertRaisesRegex(ValueError,"invalid scenario batch"):
+            with self.assertRaisesRegex(ValueError,"failed validation after one repair request"):
                 investigation.propose("nvidia/test", "test", [], 4)
 
     def test_structured_output_requests_full_bounded_scenarios(self):
@@ -118,7 +118,7 @@ class InvestigationTests(unittest.TestCase):
     def test_incomplete_or_null_model_outputs_are_rejected(self):
         for content in (None, json.dumps({"hypothesis": "test", "scenarios": [{}] * 4})):
             with patch.object(investigation, "api", return_value={"choices": [{"message": {"content": content}}]}):
-                with self.assertRaisesRegex(ValueError, "invalid scenario batch"):
+                with self.assertRaisesRegex(ValueError, "failed validation after one repair request"):
                     investigation.propose("nvidia/test", "test", [], 4)
 
     def test_search_budget_is_bounded(self):

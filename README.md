@@ -21,7 +21,7 @@ Highway live inference is wired to the existing Nebius connection but has only b
 
 ## Analyze and test a controller adjustment
 
-After loading a manual or generated case, click **Analyze & test adjustment with AI** below the replay comparison. This makes up to three Nebius model requests and uses one hosted daily allowance slot. The server enforces the three-call limit. Each attempt receives prior measured outcomes, traces and regression evidence; the scenario and original baseline remain fixed. It stops on an improvement without regressions, a repeated proposal, an error, or budget exhaustion. Earlier successful evaluations survive a later provider failure.
+After loading a manual or generated case, click **Analyze & test adjustment with AI** below the replay comparison. This makes up to three Nebius model requests and uses one hosted daily allowance slot. The server enforces the three-call limit. Each attempt receives prior measured outcomes, traces and regression evidence; the scenario and original baseline remain fixed. Invalid model JSON or settings consume a request slot and trigger a correction within the same three-request budget; failed requests remain in the report. It stops on an improvement without regressions, a repeated proposal, a provider/network error, or budget exhaustion. Earlier successful evaluations survive a later provider failure.
 
 1. The server recomputes the reactive/aggressive baseline and sends its measured events, metrics, scenario and allowed settings to the model. Street cases also include a decision trace: visible observations, projected pedestrian position, conflict detection, requested acceleration, applied acceleration and command delay. Hidden pedestrian positions are omitted from controller observations. The report shows original/proposed traces and flags disabled slowing or an unchanged trajectory separately from the AI hypothesis.
 2. AI returns a hypothesis and rationale plus a strict JSON controller configuration. Unsupported settings, non-finite values and out-of-range values are rejected. No model-generated code executes.
@@ -139,3 +139,11 @@ MIT licensed. The local demo is not affiliated with or endorsed by NVIDIA, Nebiu
 ## Evidence audit
 
 See [the offline benchmark report](BENCHMARK.md) for the historical AI batch versus 100 seeds of random search and a pedestrian-only random baseline. Reproduce with `python3 benchmark.py`; it makes no network or model calls. Replay the remaining shared failure with `python3 replay.py examples/regressions/both-controllers-fail.json`. This is preliminary evidence from one AI run and internal controllers, not a validated general advantage.
+
+### Live-response reliability
+
+Scenario generation allows one repair request per batch (at most four model calls for a hosted 12-case investigation). Complete JSON and every field/type/bound are validated before simulation; incomplete or truncated output is never executed. The adjustment loop retains a strict three-request cap including invalid responses. Unchanged trajectories are explicitly flagged and fed into revision. Verified timing tables separate requested braking from applied braking; free-text AI notes are collapsed and labeled unverified, not presented as established diagnoses.
+
+### Live verification — 29 October 2026
+
+A real Nebius run of the revised code completed a 12-scenario pedestrian investigation and three adjustment proposals. Two proposals changed the trajectory; one lowered impact speed from 28.8 to 8.59 km/h, but all still collided and none passed the additional checks without regressions. This is a completed workflow, not a successful controller fix. See `examples/live-adjustment-20261029.json`; replay it with `python3 replay.py examples/live-adjustment-20261029.json`. The invalid-response repair paths are covered by automated tests; the successful live generation run did not need a repair.
