@@ -1,0 +1,1006 @@
+{
+  "type": "controller-adjustment",
+  "version": "blindspot-adjustment-1",
+  "scenario": {
+    "kind": "highway",
+    "speed_kmh": 95,
+    "traffic_kmh": 90,
+    "speed_variation": 5,
+    "spacing_m": 70,
+    "exit_distance_m": 200,
+    "aggressiveness": 0.3,
+    "traffic_phase": 20
+  },
+  "baseline_settings": {
+    "exit_prepare_m": 130,
+    "lane_cooldown_s": 0.8,
+    "speed_gain_mps": 1.2000000000000002
+  },
+  "proposed_settings": {
+    "exit_prepare_m": 300,
+    "lane_cooldown_s": 6,
+    "speed_gain_mps": 3.5
+  },
+  "original": {
+    "id": "f966f4c23e",
+    "version": "blindspot-highway-1",
+    "scenario": {
+      "kind": "highway",
+      "speed_kmh": 95,
+      "traffic_kmh": 90,
+      "speed_variation": 5,
+      "spacing_m": 70,
+      "exit_distance_m": 200,
+      "aggressiveness": 0.3,
+      "traffic_phase": 20
+    },
+    "policy": "reactive",
+    "events": [
+      {
+        "t": 1.5,
+        "kind": "lane_change",
+        "text": "Pursue faster lane: lane 2 \u2192 1"
+      },
+      {
+        "t": 3.5,
+        "kind": "lane_change",
+        "text": "Move right for exit: lane 1 \u2192 2"
+      },
+      {
+        "t": 5.5,
+        "kind": "lane_change",
+        "text": "Move right for exit: lane 2 \u2192 3"
+      },
+      {
+        "t": 7.9,
+        "kind": "exit",
+        "text": "Reached exit lane"
+      },
+      {
+        "t": 9.6,
+        "kind": "finish",
+        "text": "Exit taken"
+      }
+    ],
+    "metrics": {
+      "collision": false,
+      "finished": true,
+      "impact_kmh": null,
+      "duration_s": 9.6,
+      "lane_changes": 3,
+      "direction_reversals": 1,
+      "exit_success": true,
+      "missed_exit": false,
+      "min_clearance_m": 15.692,
+      "hard_brakes": 0,
+      "first_seen_s": null,
+      "first_brake_s": 3.2
+    }
+  },
+  "proposed": {
+    "id": "0a60d1444b",
+    "version": "blindspot-highway-1",
+    "scenario": {
+      "kind": "highway",
+      "speed_kmh": 95,
+      "traffic_kmh": 90,
+      "speed_variation": 5,
+      "spacing_m": 70,
+      "exit_distance_m": 200,
+      "aggressiveness": 0.3,
+      "traffic_phase": 20
+    },
+    "controller": {
+      "exit_prepare_m": 300,
+      "lane_cooldown_s": 6,
+      "speed_gain_mps": 3.5
+    },
+    "policy": "reactive",
+    "events": [
+      {
+        "t": 0,
+        "kind": "lane_change",
+        "text": "Move right for exit: lane 2 \u2192 3"
+      },
+      {
+        "t": 7.6,
+        "kind": "exit",
+        "text": "Reached exit lane"
+      },
+      {
+        "t": 9.3,
+        "kind": "finish",
+        "text": "Exit taken"
+      }
+    ],
+    "metrics": {
+      "collision": false,
+      "finished": true,
+      "impact_kmh": null,
+      "duration_s": 9.3,
+      "lane_changes": 1,
+      "direction_reversals": 0,
+      "exit_success": true,
+      "missed_exit": false,
+      "min_clearance_m": 15.692,
+      "hard_brakes": 0,
+      "first_seen_s": null,
+      "first_brake_s": null
+    }
+  },
+  "case_verdict": "improved",
+  "behavior_changed": true,
+  "engineering_findings": [],
+  "proposal_warnings": [],
+  "overall_verdict": "improved",
+  "regressions": [
+    {
+      "scenario": {
+        "kind": "highway",
+        "speed_kmh": 95,
+        "traffic_kmh": 90,
+        "speed_variation": 5,
+        "spacing_m": 70,
+        "exit_distance_m": 200,
+        "aggressiveness": 0.3,
+        "traffic_phase": 24
+      },
+      "original": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.6,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.692,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 5.1
+      },
+      "proposed": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.6,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.692,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 5.1
+      },
+      "verdict": "unchanged"
+    },
+    {
+      "scenario": {
+        "kind": "highway",
+        "speed_kmh": 95,
+        "traffic_kmh": 90,
+        "speed_variation": 5,
+        "spacing_m": 70,
+        "exit_distance_m": 200,
+        "aggressiveness": 0.3,
+        "traffic_phase": 29
+      },
+      "original": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.4,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 12.8,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 7.8
+      },
+      "proposed": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.4,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 12.8,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 7.8
+      },
+      "verdict": "unchanged"
+    },
+    {
+      "scenario": {
+        "kind": "highway",
+        "speed_kmh": 95,
+        "traffic_kmh": 90,
+        "speed_variation": 5,
+        "spacing_m": 70,
+        "exit_distance_m": 200,
+        "aggressiveness": 0.3,
+        "traffic_phase": 5
+      },
+      "original": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.6,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.692,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 5.4
+      },
+      "proposed": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.6,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.692,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 5.4
+      },
+      "verdict": "unchanged"
+    },
+    {
+      "scenario": {
+        "kind": "highway",
+        "speed_kmh": 95,
+        "traffic_kmh": 90,
+        "speed_variation": 5,
+        "spacing_m": 35,
+        "exit_distance_m": 200,
+        "aggressiveness": 0.3,
+        "traffic_phase": 20
+      },
+      "original": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 10.4,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 1.434,
+        "hard_brakes": 1,
+        "first_seen_s": null,
+        "first_brake_s": 0
+      },
+      "proposed": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 10.4,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 3.949,
+        "hard_brakes": 1,
+        "first_seen_s": null,
+        "first_brake_s": 0
+      },
+      "verdict": "unchanged"
+    },
+    {
+      "scenario": {
+        "kind": "highway",
+        "speed_kmh": 95,
+        "traffic_kmh": 90,
+        "speed_variation": 5,
+        "spacing_m": 85,
+        "exit_distance_m": 200,
+        "aggressiveness": 0.3,
+        "traffic_phase": 20
+      },
+      "original": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.6,
+        "lane_changes": 3,
+        "direction_reversals": 1,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 21.52,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 3.2
+      },
+      "proposed": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.3,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.9,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": null
+      },
+      "verdict": "improved"
+    },
+    {
+      "scenario": {
+        "kind": "highway",
+        "speed_kmh": 95,
+        "traffic_kmh": 90,
+        "speed_variation": 5,
+        "spacing_m": 70,
+        "exit_distance_m": 400,
+        "aggressiveness": 0.3,
+        "traffic_phase": 20
+      },
+      "original": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 17.4,
+        "lane_changes": 3,
+        "direction_reversals": 1,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 13.009,
+        "hard_brakes": 1,
+        "first_seen_s": null,
+        "first_brake_s": 3.2
+      },
+      "proposed": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 17.3,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 13.237,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": 3.2
+      },
+      "verdict": "improved"
+    }
+  ],
+  "regression_counts": {
+    "improved": 2,
+    "mixed": 0,
+    "worse": 0,
+    "unchanged": 4
+  },
+  "evaluation_rule": "Collisions, missed exits and completion first; then lane changes, reversals, hard braking and elapsed time (0.5 s tolerance). Tradeoffs are mixed.",
+  "limitations": "Six fixed synthetic regression checks, not independent real-world validation. Scenario and traffic stay identical within each pair. Only the built-in reactive controller is adjusted.",
+  "reference_checks": [
+    {
+      "source": "fixed simulator reference probe, not an AI proposal",
+      "settings": {
+        "exit_prepare_m": 250,
+        "lane_cooldown_s": 6,
+        "speed_gain_mps": 3.5
+      },
+      "metrics": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.3,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.692,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": null
+      },
+      "case_verdict": "improved",
+      "regression_counts": {
+        "improved": 2,
+        "mixed": 0,
+        "worse": 0,
+        "unchanged": 4
+      },
+      "behavior_changed": true
+    },
+    {
+      "source": "fixed simulator reference probe, not an AI proposal",
+      "settings": {
+        "exit_prepare_m": 500,
+        "lane_cooldown_s": 6,
+        "speed_gain_mps": 3.5
+      },
+      "metrics": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.3,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.692,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": null
+      },
+      "case_verdict": "improved",
+      "regression_counts": {
+        "improved": 2,
+        "mixed": 0,
+        "worse": 0,
+        "unchanged": 4
+      },
+      "behavior_changed": true
+    },
+    {
+      "source": "fixed simulator reference probe, not an AI proposal",
+      "settings": {
+        "exit_prepare_m": 800,
+        "lane_cooldown_s": 6,
+        "speed_gain_mps": 3.5
+      },
+      "metrics": {
+        "collision": false,
+        "finished": true,
+        "impact_kmh": null,
+        "duration_s": 9.3,
+        "lane_changes": 1,
+        "direction_reversals": 0,
+        "exit_success": true,
+        "missed_exit": false,
+        "min_clearance_m": 15.692,
+        "hard_brakes": 0,
+        "first_seen_s": null,
+        "first_brake_s": null
+      },
+      "case_verdict": "improved",
+      "regression_counts": {
+        "improved": 2,
+        "mixed": 0,
+        "worse": 0,
+        "unchanged": 4
+      },
+      "behavior_changed": true
+    }
+  ],
+  "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+  "concern": "On a highway the car repeatedly changes left and right to chase faster traffic near a right-side exit. Find unnecessary lane reversals and missed exits, then compare controller outcomes.",
+  "hypothesis": "The controller initiates lane changes to chase faster traffic before the exit is near enough, leading to repeated left\u2011right maneuvers that waste time and distance.",
+  "rationale": "Reference probe with exit_prepare_m=300 (new), lane_cooldown_s=6, speed_gain_mps=3.5 shows reduced lane changes and no regression in min_clearance_m or hard_brakes; it triggers deceleration earlier than the baseline 130\u202fm threshold, preventing repeated reversals while keeping the same safe clearance. This early\u2011slowing adjustment addresses the observed unnecessary shifts without repeating an ineffective later trigger.",
+  "usage": {
+    "completion_tokens": 1921,
+    "prompt_tokens": 1567,
+    "total_tokens": 3488,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  },
+  "attempt_number": 1,
+  "attempts": [
+    {
+      "type": "controller-adjustment",
+      "version": "blindspot-adjustment-1",
+      "scenario": {
+        "kind": "highway",
+        "speed_kmh": 95,
+        "traffic_kmh": 90,
+        "speed_variation": 5,
+        "spacing_m": 70,
+        "exit_distance_m": 200,
+        "aggressiveness": 0.3,
+        "traffic_phase": 20
+      },
+      "baseline_settings": {
+        "exit_prepare_m": 130,
+        "lane_cooldown_s": 0.8,
+        "speed_gain_mps": 1.2000000000000002
+      },
+      "proposed_settings": {
+        "exit_prepare_m": 300,
+        "lane_cooldown_s": 6,
+        "speed_gain_mps": 3.5
+      },
+      "original": {
+        "id": "f966f4c23e",
+        "version": "blindspot-highway-1",
+        "scenario": {
+          "kind": "highway",
+          "speed_kmh": 95,
+          "traffic_kmh": 90,
+          "speed_variation": 5,
+          "spacing_m": 70,
+          "exit_distance_m": 200,
+          "aggressiveness": 0.3,
+          "traffic_phase": 20
+        },
+        "policy": "reactive",
+        "events": [
+          {
+            "t": 1.5,
+            "kind": "lane_change",
+            "text": "Pursue faster lane: lane 2 \u2192 1"
+          },
+          {
+            "t": 3.5,
+            "kind": "lane_change",
+            "text": "Move right for exit: lane 1 \u2192 2"
+          },
+          {
+            "t": 5.5,
+            "kind": "lane_change",
+            "text": "Move right for exit: lane 2 \u2192 3"
+          },
+          {
+            "t": 7.9,
+            "kind": "exit",
+            "text": "Reached exit lane"
+          },
+          {
+            "t": 9.6,
+            "kind": "finish",
+            "text": "Exit taken"
+          }
+        ],
+        "metrics": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 9.6,
+          "lane_changes": 3,
+          "direction_reversals": 1,
+          "exit_success": true,
+          "missed_exit": false,
+          "min_clearance_m": 15.692,
+          "hard_brakes": 0,
+          "first_seen_s": null,
+          "first_brake_s": 3.2
+        }
+      },
+      "proposed": {
+        "id": "0a60d1444b",
+        "version": "blindspot-highway-1",
+        "scenario": {
+          "kind": "highway",
+          "speed_kmh": 95,
+          "traffic_kmh": 90,
+          "speed_variation": 5,
+          "spacing_m": 70,
+          "exit_distance_m": 200,
+          "aggressiveness": 0.3,
+          "traffic_phase": 20
+        },
+        "controller": {
+          "exit_prepare_m": 300,
+          "lane_cooldown_s": 6,
+          "speed_gain_mps": 3.5
+        },
+        "policy": "reactive",
+        "events": [
+          {
+            "t": 0,
+            "kind": "lane_change",
+            "text": "Move right for exit: lane 2 \u2192 3"
+          },
+          {
+            "t": 7.6,
+            "kind": "exit",
+            "text": "Reached exit lane"
+          },
+          {
+            "t": 9.3,
+            "kind": "finish",
+            "text": "Exit taken"
+          }
+        ],
+        "metrics": {
+          "collision": false,
+          "finished": true,
+          "impact_kmh": null,
+          "duration_s": 9.3,
+          "lane_changes": 1,
+          "direction_reversals": 0,
+          "exit_success": true,
+          "missed_exit": false,
+          "min_clearance_m": 15.692,
+          "hard_brakes": 0,
+          "first_seen_s": null,
+          "first_brake_s": null
+        }
+      },
+      "case_verdict": "improved",
+      "behavior_changed": true,
+      "engineering_findings": [],
+      "proposal_warnings": [],
+      "overall_verdict": "improved",
+      "regressions": [
+        {
+          "scenario": {
+            "kind": "highway",
+            "speed_kmh": 95,
+            "traffic_kmh": 90,
+            "speed_variation": 5,
+            "spacing_m": 70,
+            "exit_distance_m": 200,
+            "aggressiveness": 0.3,
+            "traffic_phase": 24
+          },
+          "original": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.6,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.692,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 5.1
+          },
+          "proposed": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.6,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.692,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 5.1
+          },
+          "verdict": "unchanged"
+        },
+        {
+          "scenario": {
+            "kind": "highway",
+            "speed_kmh": 95,
+            "traffic_kmh": 90,
+            "speed_variation": 5,
+            "spacing_m": 70,
+            "exit_distance_m": 200,
+            "aggressiveness": 0.3,
+            "traffic_phase": 29
+          },
+          "original": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.4,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 12.8,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 7.8
+          },
+          "proposed": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.4,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 12.8,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 7.8
+          },
+          "verdict": "unchanged"
+        },
+        {
+          "scenario": {
+            "kind": "highway",
+            "speed_kmh": 95,
+            "traffic_kmh": 90,
+            "speed_variation": 5,
+            "spacing_m": 70,
+            "exit_distance_m": 200,
+            "aggressiveness": 0.3,
+            "traffic_phase": 5
+          },
+          "original": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.6,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.692,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 5.4
+          },
+          "proposed": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.6,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.692,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 5.4
+          },
+          "verdict": "unchanged"
+        },
+        {
+          "scenario": {
+            "kind": "highway",
+            "speed_kmh": 95,
+            "traffic_kmh": 90,
+            "speed_variation": 5,
+            "spacing_m": 35,
+            "exit_distance_m": 200,
+            "aggressiveness": 0.3,
+            "traffic_phase": 20
+          },
+          "original": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 10.4,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 1.434,
+            "hard_brakes": 1,
+            "first_seen_s": null,
+            "first_brake_s": 0
+          },
+          "proposed": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 10.4,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 3.949,
+            "hard_brakes": 1,
+            "first_seen_s": null,
+            "first_brake_s": 0
+          },
+          "verdict": "unchanged"
+        },
+        {
+          "scenario": {
+            "kind": "highway",
+            "speed_kmh": 95,
+            "traffic_kmh": 90,
+            "speed_variation": 5,
+            "spacing_m": 85,
+            "exit_distance_m": 200,
+            "aggressiveness": 0.3,
+            "traffic_phase": 20
+          },
+          "original": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.6,
+            "lane_changes": 3,
+            "direction_reversals": 1,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 21.52,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 3.2
+          },
+          "proposed": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.3,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.9,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": null
+          },
+          "verdict": "improved"
+        },
+        {
+          "scenario": {
+            "kind": "highway",
+            "speed_kmh": 95,
+            "traffic_kmh": 90,
+            "speed_variation": 5,
+            "spacing_m": 70,
+            "exit_distance_m": 400,
+            "aggressiveness": 0.3,
+            "traffic_phase": 20
+          },
+          "original": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 17.4,
+            "lane_changes": 3,
+            "direction_reversals": 1,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 13.009,
+            "hard_brakes": 1,
+            "first_seen_s": null,
+            "first_brake_s": 3.2
+          },
+          "proposed": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 17.3,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 13.237,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": 3.2
+          },
+          "verdict": "improved"
+        }
+      ],
+      "regression_counts": {
+        "improved": 2,
+        "mixed": 0,
+        "worse": 0,
+        "unchanged": 4
+      },
+      "evaluation_rule": "Collisions, missed exits and completion first; then lane changes, reversals, hard braking and elapsed time (0.5 s tolerance). Tradeoffs are mixed.",
+      "limitations": "Six fixed synthetic regression checks, not independent real-world validation. Scenario and traffic stay identical within each pair. Only the built-in reactive controller is adjusted.",
+      "reference_checks": [
+        {
+          "source": "fixed simulator reference probe, not an AI proposal",
+          "settings": {
+            "exit_prepare_m": 250,
+            "lane_cooldown_s": 6,
+            "speed_gain_mps": 3.5
+          },
+          "metrics": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.3,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.692,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": null
+          },
+          "case_verdict": "improved",
+          "regression_counts": {
+            "improved": 2,
+            "mixed": 0,
+            "worse": 0,
+            "unchanged": 4
+          },
+          "behavior_changed": true
+        },
+        {
+          "source": "fixed simulator reference probe, not an AI proposal",
+          "settings": {
+            "exit_prepare_m": 500,
+            "lane_cooldown_s": 6,
+            "speed_gain_mps": 3.5
+          },
+          "metrics": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.3,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.692,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": null
+          },
+          "case_verdict": "improved",
+          "regression_counts": {
+            "improved": 2,
+            "mixed": 0,
+            "worse": 0,
+            "unchanged": 4
+          },
+          "behavior_changed": true
+        },
+        {
+          "source": "fixed simulator reference probe, not an AI proposal",
+          "settings": {
+            "exit_prepare_m": 800,
+            "lane_cooldown_s": 6,
+            "speed_gain_mps": 3.5
+          },
+          "metrics": {
+            "collision": false,
+            "finished": true,
+            "impact_kmh": null,
+            "duration_s": 9.3,
+            "lane_changes": 1,
+            "direction_reversals": 0,
+            "exit_success": true,
+            "missed_exit": false,
+            "min_clearance_m": 15.692,
+            "hard_brakes": 0,
+            "first_seen_s": null,
+            "first_brake_s": null
+          },
+          "case_verdict": "improved",
+          "regression_counts": {
+            "improved": 2,
+            "mixed": 0,
+            "worse": 0,
+            "unchanged": 4
+          },
+          "behavior_changed": true
+        }
+      ],
+      "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+      "concern": "On a highway the car repeatedly changes left and right to chase faster traffic near a right-side exit. Find unnecessary lane reversals and missed exits, then compare controller outcomes.",
+      "hypothesis": "The controller initiates lane changes to chase faster traffic before the exit is near enough, leading to repeated left\u2011right maneuvers that waste time and distance.",
+      "rationale": "Reference probe with exit_prepare_m=300 (new), lane_cooldown_s=6, speed_gain_mps=3.5 shows reduced lane changes and no regression in min_clearance_m or hard_brakes; it triggers deceleration earlier than the baseline 130\u202fm threshold, preventing repeated reversals while keeping the same safe clearance. This early\u2011slowing adjustment addresses the observed unnecessary shifts without repeating an ineffective later trigger.",
+      "usage": {
+        "completion_tokens": 1921,
+        "prompt_tokens": 1567,
+        "total_tokens": 3488,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "attempt_number": 1
+    }
+  ],
+  "selected_attempt": 1,
+  "max_attempts": 3,
+  "failed_requests": [],
+  "stop_reason": "acceptable_candidate",
+  "accepted": true,
+  "conclusion": "A candidate improved this case without measured regressions in the six checks.",
+  "selection_rule": "Select an acceptable candidate first; otherwise minimize collisions, task failures, regressions and tradeoffs across seven cases. Ties favor the earlier attempt.",
+  "total_usage": {
+    "prompt_tokens": 1567,
+    "completion_tokens": 1921,
+    "total_tokens": 3488
+  }
+}
