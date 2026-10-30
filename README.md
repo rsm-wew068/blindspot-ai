@@ -151,3 +151,5 @@ A real Nebius run of the revised code completed a 12-scenario pedestrian investi
 The adjustment agent also receives three fixed simulator reference probes (early-slowing settings on Street; earlier exit preparation on Highway). Their measured original-case and regression outcomes are labeled separately from AI proposals in the report. They require no model calls and are guidance, not guaranteed fixes.
 
 A second real Nebius run with reference-probe evidence produced three proposals: attempts 1 and 2 avoided the default Street collision; attempt 2 moved first applied braking from 2.65 s to 0.525 s. Additional checks still regressed, so no proposal was accepted overall. All three produced different vehicle trajectories. Reproduce `examples/live-reference-adjustment-20261029.json` with the replay CLI.
+
+Production verification on Render completed three real Nebius proposals. Attempts 2 and 3 avoided the original collision but worsened four additional checks; no adjustment was accepted overall. Original/proposed replay controls were verified. Replay the evidence with `python3 replay.py examples/live-production-adjustment-20261029.json`.
