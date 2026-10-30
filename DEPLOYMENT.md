@@ -14,7 +14,7 @@ The multi-stage Docker build compiles React/Vite with Node 22, then copies only 
 
 In the hosting provider's secret environment settings, add `NEBIUS_TOKEN_FACTORY_KEY`, `NEBIUS_MODEL=nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, and `BLINDSPOT_ENABLE_AI=1`. The key stays server-side. Uploading this key to a provider is separate from checking source into GitHub.
 
-Hosted AI runs allow at most 12 scenarios / two calls, and default to three runs per UTC day across the whole deployment (`BLINDSPOT_AI_DAILY_RUNS`). Failed attempts count toward this limit. Mount a persistent, writable volume at `/data` so the SQLite run counter survives redeployments. For a non-root volume, grant UID 10001 write permission. Without a persistent volume, redeployment resets this allowance. This run-count limit is not a dollar billing cap. Configure provider-side spending controls separately.
+Hosted AI has no daily run cap. The legacy `BLINDSPOT_AI_DAILY_RUNS` setting is ignored. Each investigation is still limited to 12 scenarios, with at most one repair request per batch; each adjustment has at most three model requests. One job runs at a time. Nebius requests consume credits; provider-side limits still apply. A persistent volume is no longer needed for a daily run counter.
 
 Exports download to the visitor's browser rather than being left on the server. The existing local development server still saves local exports as before.
 

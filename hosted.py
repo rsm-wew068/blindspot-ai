@@ -4,18 +4,15 @@ import base64
 import hmac
 import json
 import os
-import sqlite3
 import threading
 import uuid
-from datetime import datetime, timezone
-from pathlib import Path
 from urllib.parse import urlparse
 
 from simulation import Scenario, VERSION, compare
 from highway import HighwayScenario, compare as compare_highway
 from improvement import parse_request as parse_improvement
 from investigation import connection, counterfactuals
-from server import JOBS, LOCK, ROOT, work
+from server import JOBS, LOCK, work
 
 HEADERS = [("Cache-Control", "no-store"), ("X-Content-Type-Options", "nosniff"),
            ("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'")]
@@ -52,27 +49,6 @@ def origin_allowed(environ):
     if host.split(":")[0] in ("localhost", "127.0.0.1"):
         allowed.add("http://" + host)
     return origin in allowed
-
-
-def reserve_ai_run():
-    limit = int(os.environ.get("BLINDSPOT_AI_DAILY_RUNS", "3"))
-    folder = Path(os.environ.get("BLINDSPOT_DATA_DIR", "/data"))
-    folder.mkdir(parents=True, exist_ok=True)
-    db = sqlite3.connect(str(folder / "limits.sqlite"), timeout=5)
-    try:
-        db.execute("CREATE TABLE IF NOT EXISTS usage (day TEXT PRIMARY KEY, runs INTEGER NOT NULL)")
-        db.execute("BEGIN IMMEDIATE")
-        day = datetime.now(timezone.utc).date().isoformat()
-        row = db.execute("SELECT runs FROM usage WHERE day=?", (day,)).fetchone()
-        used = row[0] if row else 0
-        if used >= limit:
-            db.rollback()
-            return False
-        db.execute("INSERT INTO usage VALUES (?,1) ON CONFLICT(day) DO UPDATE SET runs=runs+1", (day,))
-        db.commit()
-        return True
-    finally:
-        db.close()
 
 
 def application(environ, start_response):
@@ -155,8 +131,6 @@ def application(environ, start_response):
             with LOCK:
                 if any(j["status"] == "running" for j in JOBS.values()):
                     return send(409, {"error":"An investigation is already running."})
-                if mode == "ai" and not reserve_ai_run():
-                    return send(429, {"error":"The daily AI run allowance has been reached."})
                 if len(JOBS)>=20:
                     JOBS.pop(next(iter(JOBS)))
                 job_id = uuid.uuid4().hex

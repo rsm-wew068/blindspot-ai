@@ -46,7 +46,7 @@ export default function Improvement({scenario, concern, disabled, connected, req
     <div className="panel-title"><h2>Understand the problem. Test a change.</h2><span className="tag">AI + SIMULATION</span></div>
     <p>Analyze the {scenario.kind === 'highway' ? 'aggressive' : 'reactive'} baseline in the current replay. AI proposes settings, tests the same conditions and six additional cases, then revises using measured results. Up to three attempts.</p>
     <button id="improveBtn" className="primary" disabled={disabled || running} onClick={improve}>{running ? 'Analyzing & testing…' : 'Analyze & test adjustment with AI'}</button>
-    <p className="field-help">Up to three AI requests using Nebius credits and one shared daily allowance slot. This does not modify vehicle software.</p>
+    <p className="field-help">Up to three AI requests per adjustment, using Nebius credits. No daily run cap. This does not modify vehicle software.</p>
     {progress && <p role="status">{progress}</p>}
     {report && <div id="improvementReport">
       {investigation?.attempts && <>

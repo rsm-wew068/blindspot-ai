@@ -92,15 +92,19 @@ class HostedTests(unittest.TestCase):
 
     def test_ai_budget_validated_before_spending(self):
         os.environ.update(NEBIUS_TOKEN_FACTORY_KEY='test-key-not-real',BLINDSPOT_ENABLE_AI='1')
-        with patch.object(hosted,'reserve_ai_run') as reserve:
+        with patch('hosted.threading.Thread') as thread:
             self.assertTrue(self.call('/api/investigate','POST',{'mode':'ai','budget':48})[0].startswith('400'))
-            reserve.assert_not_called()
+            thread.assert_not_called()
 
-    def test_persistent_daily_allowance(self):
-        os.environ['BLINDSPOT_AI_DAILY_RUNS']='2'
-        self.assertTrue(hosted.reserve_ai_run())
-        self.assertTrue(hosted.reserve_ai_run())
-        self.assertFalse(hosted.reserve_ai_run())
+    def test_no_daily_cap_even_with_legacy_limit_configured(self):
+        hosted.JOBS.clear()
+        os.environ.update(BLINDSPOT_ENABLE_AI='1',BLINDSPOT_AI_DAILY_RUNS='1')
+        with patch('hosted.connection',return_value={'configured':True}),patch('hosted.threading.Thread'):
+            for i in range(6):
+                status,_,body=self.call('/api/improve','POST',{'scenario':{'kind':'highway'}})
+                self.assertTrue(status.startswith('202'),status)
+                hosted.JOBS[json.loads(body)['job_id']]['status']='done'
+        hosted.JOBS.clear()
 
     def test_export_returns_artifact_without_server_write(self):
         payload={'artifact':{'scenario':{'speed_kmh':30}},'name':'example.json'}
@@ -108,20 +112,18 @@ class HostedTests(unittest.TestCase):
         self.assertTrue(status.startswith('200'))
         self.assertEqual(json.loads(body)['download'],payload['artifact'])
 
-    def test_improvement_uses_ai_gate_allowance_and_validates_before_reserving(self):
-        import server
-        server.JOBS.clear()
+    def test_improvement_retains_enablement_validation_and_concurrency(self):
+        hosted.JOBS.clear()
         payload={'scenario':{'kind':'highway'},'concern':'Missed exit'}
         self.assertTrue(self.call('/api/improve','POST',payload)[0].startswith('403'))
         os.environ['BLINDSPOT_ENABLE_AI']='1'
-        with patch('hosted.connection',return_value={'configured':True}),patch('hosted.reserve_ai_run',return_value=False) as reserve:
+        with patch('hosted.connection',return_value={'configured':True}),patch('hosted.threading.Thread') as thread:
             self.assertTrue(self.call('/api/improve','POST',{'scenario':{'kind':'highway','speed_kmh':999}})[0].startswith('400'))
-            reserve.assert_not_called()
-            self.assertTrue(self.call('/api/improve','POST',payload)[0].startswith('429'))
-        with patch('hosted.connection',return_value={'configured':True}),patch('hosted.reserve_ai_run',return_value=True),patch('hosted.threading.Thread') as thread:
+            thread.assert_not_called()
             self.assertTrue(self.call('/api/improve','POST',payload)[0].startswith('202'))
             self.assertEqual(thread.call_args.kwargs['args'][1]['task'],'improve')
-        server.JOBS.clear()
+            self.assertTrue(self.call('/api/improve','POST',payload)[0].startswith('409'))
+        hosted.JOBS.clear()
 
 
 if __name__=='__main__':

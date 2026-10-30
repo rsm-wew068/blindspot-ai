@@ -721,7 +721,7 @@ export default function App() {
           {hosted ? (
             <p>
               Hosting configuration is managed by the project owner. Hosted AI
-              runs have a shared daily allowance.
+              runs have no daily cap. Each run consumes Nebius credits.
             </p>
           ) : (
             <ol>
