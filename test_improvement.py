@@ -63,7 +63,7 @@ class ImprovementTests(unittest.TestCase):
         with self.assertRaises(ValueError):replay_report(report)
 
     def test_ai_receives_measured_evidence_not_client_metrics(self):
-        settings={'caution_distance_m':35,'caution_speed_factor':.4,'visible_margin_m':10}
+        settings={'caution_distance_m':20,'caution_speed_factor':.4,'visible_margin_m':10}
         def provider(path,payload):
             evidence=json.loads(payload['messages'][1]['content'])
             self.assertEqual(evidence['metrics'],street_run(Scenario(),replay=False)['metrics'])
@@ -137,8 +137,8 @@ class ImprovementTests(unittest.TestCase):
                 last=evidence['previous_attempts'][-1]
                 self.assertIn('decision_trace',last)
                 self.assertEqual(len(last['regressions']),6)
-                self.assertEqual(last['settings']['caution_distance_m'],10*number)
-            return {'choices':[{'message':{'content':json.dumps({'hypothesis':'Test earlier slowing','rationale':'Respond to regression measurements','settings':{'caution_distance_m':10*(number+1),'caution_speed_factor':.4,'visible_margin_m':10}})}}], 'usage':{'total_tokens':10}}
+                self.assertEqual(last['settings']['caution_distance_m'],5*number)
+            return {'choices':[{'message':{'content':json.dumps({'hypothesis':'Test earlier slowing','rationale':'Respond to regression measurements','settings':{'caution_distance_m':5*(number+1),'caution_speed_factor':.4,'visible_margin_m':10}})}}], 'usage':{'total_tokens':10}}
         with patch('improvement.choose_model',return_value='test'),patch('improvement.api',side_effect=provider) as api:
             result=improve({'scenario':asdict(Scenario())})
         self.assertEqual(api.call_count,3)
@@ -153,8 +153,8 @@ class ImprovementTests(unittest.TestCase):
         with self.assertRaises(ValueError):replay_report(exported)
 
     def test_loop_stops_on_acceptable_candidate(self):
-        report=evaluate(Scenario(),baseline(Scenario()))
-        report.update(case_verdict='improved',regression_counts={'improved':1,'mixed':0,'worse':0,'unchanged':5},hypothesis='h',rationale='r')
+        report=evaluate(Scenario(),{'caution_distance_m':30,'caution_speed_factor':.4,'visible_margin_m':10})
+        report.update(hypothesis='h',rationale='r')
         with patch('improvement.choose_model',return_value='test'),patch('improvement.propose_and_test',return_value=report) as propose:
             result=improve({'scenario':asdict(Scenario())})
         self.assertEqual(propose.call_count,1)

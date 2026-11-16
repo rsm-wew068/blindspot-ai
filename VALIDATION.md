@@ -85,3 +85,14 @@ Replaced the separate Highway page with the shared scenario-lab shell used by St
 ## Single persistent replay viewport
 
 Moved Street/Highway selection into Live replay and removed the separate Highway replay component. Both environments use the same mounted Replay component, canvas DOM element, HUD, and playback controls. Browser checks verified canvas/header/prompt identity across switches, preserved prompt/camera/mute/playback-speed settings, separate histories, highway AI result handoff with mocked job results, and mobile layout. Screenshots inspected; no browser errors. Four frontend tests and the build pass. No new model calls; public deployment unverified.
+
+
+## Controller adjustment & live verification — October–November 2026
+
+- **Controller adjustment loop**: Added up-to-three-attempt AI controller revision (`/api/improve`) grounded in measured baseline events, Street decision traces (`first_conflict_s`, `first_requested_brake_s`, `first_applied_brake_s`), three fixed simulator reference probes, and six regression scenarios per environment. Invalid JSON or out-of-bounds settings consume a request slot without executing simulation and trigger in-budget repair.
+- **Recorded live Nebius artifacts**:
+  - `examples/live-adjustment-20261029.json` — initial 12-scenario Street investigation and 3 adjustment proposals.
+  - `examples/live-reference-adjustment-20261029.json` — Street adjustment with fixed reference probes; attempts 1–2 avoided the baseline collision.
+  - `examples/live-production-adjustment-20261029.json` — Render production Street adjustment verification.
+  - `examples/live-highway-production-20261030.json` — Render production Highway investigation and adjustment reducing lane changes (3 → 1) and direction reversals (1 → 0).
+- **End-to-end Three.js + Live AI verification (15 November 2026)**: Verified 4 distinct `#concern` prompts across Street and Highway/Freeway (`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`) through 2-round scenario generation, Three.js WebGL problem rendering, AI controller adjustment (`Candidate found for review`), and automatic Three.js `Proposed adjustment` replay rendering. 61 Python tests and 6 frontend tests pass.

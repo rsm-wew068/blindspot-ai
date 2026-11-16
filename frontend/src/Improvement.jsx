@@ -21,7 +21,7 @@ export default function Improvement({scenario, concern, disabled, connected, req
         if (state.status === 'error') throw Error(state.error);
         if (state.status === 'done') {
           setInvestigation(state.result); setReport(state.result); setProgress('Analysis and simulation checks complete.');
-          onReplay(state.result, state.result.accepted ? 'cautious' : 'reactive'); break;
+          onReplay(state.result, state.result.accepted || state.result.case_verdict === 'improved' ? 'cautious' : 'reactive'); break;
         }
         setProgress(state.progress?.message || 'Testing the proposed settings…');
       }
@@ -52,7 +52,7 @@ export default function Improvement({scenario, concern, disabled, connected, req
       {investigation?.attempts && <>
         <h3>{investigation.accepted ? 'Candidate found for review' : 'No acceptable adjustment found'}</h3>
         <p>{investigation.conclusion}</p>
-        <p>Stopped: {({acceptable_candidate:'current case improved with no measured regressions', budget_exhausted:'three-attempt budget exhausted', repeated_proposal:'AI repeated an already tested configuration', proposal_error:'request budget exhausted after invalid proposals; valid results retained'})[investigation.stop_reason]}.</p>
+        <p>Stopped: {({acceptable_candidate:'current case improved with no safety or completion regressions', budget_exhausted:'three-attempt budget exhausted', repeated_proposal:'AI repeated an already tested configuration', proposal_error:'request budget exhausted after invalid proposals; valid results retained'})[investigation.stop_reason]}.</p>
         {investigation.failed_requests?.length > 0 && <details><summary>{investigation.failed_requests.length} invalid AI response(s) — no simulation executed for those requests</summary><ul>{investigation.failed_requests.map((failure,i)=><li key={i}>Request {failure.request}: {failure.reason}</li>)}</ul></details>}
         <div className="adjustment-actions" role="group" aria-label="Adjustment attempts">{investigation.attempts.map(attempt=><button key={attempt.attempt_number} className="quiet" disabled={disabled} aria-pressed={report.attempt_number === attempt.attempt_number} onClick={()=>{setReport(attempt);onReplay(attempt,'cautious');}}>
           Attempt {attempt.attempt_number}: {attempt.case_verdict}{attempt.attempt_number === investigation.selected_attempt ? ' · selected' : ''}

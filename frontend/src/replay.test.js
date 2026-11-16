@@ -49,10 +49,29 @@ test('highway replay interpolates lane motion and traffic by stable vehicle iden
   assert.deepEqual(highwayFrame(frames,5),frames[1]);
 });
 
-import { environmentForPrompt } from "./environment.js";
+import { environmentForPrompt, selectInvestigationCase } from "./environment.js";
 test("prompt selects highway and falls back to street", () => {
   for (const prompt of ["", "A pedestrian crosses the street", "A car on Broadway"])
     assert.equal(environmentForPrompt(prompt), "crosswalk");
   for (const prompt of ["HIGHWAY lane changes", "Take a freeway exit", "interstate traffic", "motorway"])
     assert.equal(environmentForPrompt(prompt), "highway");
+});
+
+test("investigation case selector prioritizes fixable failures and feasible highway exits", () => {
+  const streetRows = [
+    { index: 1, reactive: { collision: false }, cautious: { collision: true } },
+    { index: 2, reactive: { collision: true }, cautious: { collision: false } },
+  ];
+  const streetPick = selectInvestigationCase(streetRows, false);
+  assert.equal(streetPick.chosen.index, 2);
+  assert.equal(streetPick.policy, "reactive");
+
+  const highwayRows = [
+    { index: 1, scenario: { exit_distance_m: 20 }, reactive: { collision: false, missed_exit: true, direction_reversals: 0, lane_changes: 0 }, cautious: { collision: false, missed_exit: true } },
+    { index: 2, scenario: { exit_distance_m: 400 }, reactive: { collision: false, missed_exit: false, direction_reversals: 0, lane_changes: 1 }, cautious: { collision: false, missed_exit: false } },
+    { index: 3, scenario: { exit_distance_m: 320 }, reactive: { collision: false, missed_exit: true, direction_reversals: 0, lane_changes: 2 }, cautious: { collision: false, missed_exit: false } },
+  ];
+  const highwayPick = selectInvestigationCase(highwayRows, true);
+  assert.equal(highwayPick.chosen.index, 3);
+  assert.equal(highwayPick.reason, "missed exit found");
 });

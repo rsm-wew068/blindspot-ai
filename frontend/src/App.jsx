@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Replay from "./Replay.jsx";
 import Improvement from "./Improvement.jsx";
-import { environmentForPrompt } from "./environment.js";
+import { environmentForPrompt, selectInvestigationCase } from "./environment.js";
 import "./highway.css";
-const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:104.6074,traffic_kmh:104.6074,speed_variation:8.0467,spacing_m:60,exit_distance_m:10,aggressiveness:.5,traffic_phase:3};
-const HIGHWAY_FIELDS = [["speed_kmh","Target speed",40,100,1,"mph"],["traffic_kmh","Traffic speed",40,100,1,"mph"],["speed_variation","Traffic speed variation",0,20,1,"mph"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",0,10,1,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
+const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:104.6074,traffic_kmh:104.6074,speed_variation:8.0467,spacing_m:60,exit_distance_m:600,aggressiveness:.5,traffic_phase:3};
+const HIGHWAY_FIELDS = [["speed_kmh","Target speed",40,100,1,"mph"],["traffic_kmh","Traffic speed",40,100,1,"mph"],["speed_variation","Traffic speed variation",0,20,1,"mph"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",0,1600,10,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
 
 import { Comparison, Notebook, Modal, Outcome } from "./components.jsx";
 const DEFAULTS = {
@@ -198,9 +198,7 @@ export default function App() {
           setHistories(current => ({...current, [investigationScene]: [state.result, ...current[investigationScene]].slice(0, 8)}));
           if (selected === "ai") {
             const rows = state.result.rows;
-            const chosen = highway ? rows.reduce((best,row)=>row.reactive.direction_reversals>best.reactive.direction_reversals?row:best,rows[0]) : rows.find((row) => row.reactive.collision || row.cautious.collision) || rows[0];
-            const chosenPolicy = highway ? "reactive" : chosen?.reactive.collision ? "reactive"
-              : chosen?.cautious.collision ? "cautious" : "reactive";
+            const { chosen, policy: chosenPolicy, reason: selectionReason } = selectInvestigationCase(rows, highway);
             setProgress("Investigation complete. Loading an AI-generated case into the replay…");
             const labels = highway ? Object.fromEntries(HIGHWAY_FIELDS.map(field=>[field[0],[field[1],field[5]]])) : { speed_kmh: ["Vehicle speed", "km/h"], van_gap: ["Van gap", "m"], emerge_s: ["Pedestrian starts at", "s"], reaction_s: ["Reaction delay", "s"], ped_speed: ["Pedestrian speed", "m/s"], brake_mps2: ["Braking strength", "m/s²"], pedestrian: ["Pedestrian present", ""] };
             const before = scene === investigationScene ? pair?.reactive.scenario || defaults : defaults;
@@ -209,7 +207,7 @@ export default function App() {
               return `${label}: ${display(before[key])} → ${display(chosen.scenario[key])}`;
             }) : [];
             const loaded = chosen && await simulate(chosen.scenario, true,
-              `Live AI · case ${chosen.index} of ${rows.length} · ${highway ? "most direction reversals" : chosen.reactive.collision || chosen.cautious.collision ? "first collision found" : "first generated case; no collisions found"}`,
+              `Live AI · case ${chosen.index} of ${rows.length} · ${selectionReason}`,
               chosenPolicy, changes);
             setProgress(loaded
               ? `Completed ${state.result.budget} tests. Replaying AI case ${chosen.index}; explore the other cases in the notebook.`

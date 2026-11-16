@@ -100,7 +100,9 @@ def reference_checks(s):
         result = evaluate(s, values)
         rows.append({'source':'fixed simulator reference probe, not an AI proposal', 'settings':values,
                      'metrics':result['proposed']['metrics'], 'case_verdict':result['case_verdict'],
-                     'regression_counts':result['regression_counts'], 'behavior_changed':result['behavior_changed']})
+                     'regression_counts':result['regression_counts'],
+                     'regression_collisions':sum(r['proposed']['collision'] for r in result['regressions']),
+                     'acceptable':acceptable(result), 'behavior_changed':result['behavior_changed']})
     return rows
 
 
@@ -159,7 +161,12 @@ def propose_and_test(data, progress=None, history=None, model=None):
 
 
 def acceptable(report):
-    return report['case_verdict'] == 'improved' and not report['regression_counts']['worse'] and not report['regression_counts']['mixed']
+    if 'missed_exit' in report['proposed']['metrics']:
+        return report['case_verdict'] == 'improved' and not report['regression_counts']['worse'] and not report['regression_counts']['mixed']
+    return (report['case_verdict'] == 'improved'
+            and not report['proposed']['metrics']['collision']
+            and report['proposed']['metrics']['finished']
+            and all(not row['proposed']['collision'] and row['proposed']['finished'] for row in report['regressions']))
 
 
 def candidate_rank(report):
@@ -217,7 +224,7 @@ def improve(data, progress=None):
     accepted = acceptable(selected)
     return {**selected, 'attempts':attempts, 'selected_attempt':selected['attempt_number'],
             'max_attempts':3, 'failed_requests':failures, 'stop_reason':stop_reason, 'accepted':accepted,
-            'conclusion': ('A candidate improved this case without measured regressions in the six checks.' if accepted else
+            'conclusion': ('A candidate improved this case with no collisions or task failures in the six checks.' if accepted else
                            'No acceptable adjustment found within this run. The selected attempt is for inspection, not an approved fix.'),
             'selection_rule':'Select an acceptable candidate first; otherwise minimize collisions, task failures, regressions and tradeoffs across seven cases. Ties favor the earlier attempt.',
             'total_usage':{key:sum(a.get('usage',{}).get(key,0) for a in attempts + failures) for key in ('prompt_tokens','completion_tokens','total_tokens')}}
