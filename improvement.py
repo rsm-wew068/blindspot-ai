@@ -119,7 +119,8 @@ def propose_and_test(data, progress=None, history=None, model=None):
         'settings':{'type':'object','additionalProperties':False,'required':list(props),'properties':props}}}
     if progress: progress({'completed':0,'message':'Analyzing measured events and proposing a controller adjustment'})
     model = model or choose_model()
-    response = api('/chat/completions', {'model':model,'temperature':.2,'max_tokens':3000,
+    response = api('/chat/completions', {'model':model,'temperature':.2,'max_tokens':1000,
+        'chat_template_kwargs':{'enable_thinking':False},
         'messages':[{'role':'system','content':
             'Analyze a synthetic driving-controller failure using only supplied measured metrics and events. '
             'Return a causal hypothesis, not a proven root cause; do not invent outcomes or assert a fix works. '

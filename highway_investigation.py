@@ -17,9 +17,11 @@ def proposal_schema(count):
 
 def propose(model, concern, history, count):
     schema = proposal_schema(count)
-    payload = {'model':model,'temperature':.3,'max_tokens':4096,
+    payload = {'model':model,'temperature':.3,'max_tokens':1200,
+        'chat_template_kwargs':{'enable_thinking':False},
         'messages':[{'role':'system','content':
             'Design bounded tests for a synthetic three-lane highway with a right exit. Return JSON only. '
+            'CRITICAL: Strictly honor any explicit speeds (note: 1 mph = 1.60934 km/h), traffic spacings, exit distances, or conditions requested in concern across ALL scenarios in EVERY batch. '
             'The ego starts in the middle lane. Background traffic follows smooth 20-second lane-specific speed waves. '
             'speed_variation is the wave amplitude in km/h; traffic_phase is in radians; spacing_m controls car gaps. '
             'The aggressive baseline pursues faster adjacent lanes with short cooldown and prepares for exit at 130m. '

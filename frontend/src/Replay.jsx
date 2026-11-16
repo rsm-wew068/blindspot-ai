@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { drawMap } from "./map.js";
 import { createImpactAudio, enteredCollision } from "./impact.js";
 import { highwayFrame, drawHighwayMap } from "./highwayReplay.js";
+import { createStreet } from "./street.js";
+import { createHighway } from "./highwayScene.js";
 import { frameAt } from "./replay.js";
 const cameras = {
   chase: "Chase",
@@ -94,8 +96,7 @@ export default function Replay({
     }
   };
   useEffect(() => {
-    let cancelled = false,
-      owned = null;
+    let owned = null;
     const target = canvas.current;
     const fallback = (event) => {
       event?.preventDefault();
@@ -105,25 +106,34 @@ export default function Replay({
       notify("3D is unavailable. The 2D replay remains available.");
     };
     target.addEventListener("webglcontextlost", fallback);
-    setAvailable(false);setFailed(false);
-    (highway ? import("./highwayScene.js") : import("./street.js"))
-      .then((module) => {
-        if (cancelled) return;
-        if (highway) {
-          const renderer = module.createHighway(target);
-          let selectedCamera = camera;
-          owned = {setCamera(value){selectedCamera=value;},setOcclusion(){},update(frame,scenario,time,collision){renderer.update(frame,scenario,selectedCamera === "overview" ? "top" : selectedCamera,collision);},dispose:renderer.dispose};
-        } else owned = module.createStreet(target);
-        view.current = owned;
-        setAvailable(true);
-      })
-      .catch(() => {
-        if (!cancelled) fallback();
-      });
+    setFailed(false);
+    try {
+      if (highway) {
+        const renderer = createHighway(target);
+        let selectedCamera = camera;
+        owned = {
+          setCamera(value) {
+            selectedCamera = value;
+          },
+          setOcclusion() {},
+          update(frame, scenario, time, collision) {
+            renderer.update(frame, scenario, selectedCamera === "overview" ? "top" : selectedCamera, collision);
+          },
+          dispose: renderer.dispose,
+        };
+      } else {
+        owned = createStreet(target);
+      }
+      view.current = owned;
+      setAvailable(true);
+      setCamera((current) => (current === "2d" && failed ? "chase" : current));
+      paint.current();
+    } catch {
+      fallback();
+    }
     const observer = new ResizeObserver(() => paint.current());
     observer.observe(map.current);
     return () => {
-      cancelled = true;
       observer.disconnect();
       target.removeEventListener("webglcontextlost", fallback);
       if (view.current === owned) view.current = null;
@@ -248,6 +258,7 @@ export default function Replay({
           aria-label="Top-down simulation replay"
         />
         <canvas
+          key={highway ? "highway-3d" : "street-3d"}
           ref={canvas}
           id="streetScene"
           hidden={!use3d}

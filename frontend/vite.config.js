@@ -1,7 +1,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+const sameOriginCredentials = () => ({
+  name: "same-origin-credentials",
+  transformIndexHtml(html) {
+    return html.replace(/ crossorigin/g, "");
+  },
+});
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), sameOriginCredentials()],
+  build: {
+    modulePreload: false,
+  },
   server: {
     proxy: {
       "/api": {
