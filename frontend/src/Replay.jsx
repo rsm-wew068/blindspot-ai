@@ -274,7 +274,7 @@ export default function Replay({
             <div className="hud-context">
               <span>{highway ? "RIGHT-SIDE HIGHWAY EXIT" : "OBSTRUCTED CROSSWALK"}</span>
               <strong id="hudDistance">
-                {highway ? `${Math.max(0, run.scenario.exit_distance_m-frame.x).toFixed(0)} m to exit` : `${Math.max(0, 45-frame.x-2.1).toFixed(1)} m to crossing`}
+                {highway ? `${(Math.max(0, run.scenario.exit_distance_m-frame.x) / 1609.344).toFixed(2)} mi to exit` : `${Math.max(0, 45-frame.x-2.1).toFixed(1)} m to crossing`}
               </strong>
               <small id="hudVisibility">
                 {highway ? frame.reason : frame.ped_y === null

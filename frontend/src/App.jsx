@@ -3,8 +3,11 @@ import Replay from "./Replay.jsx";
 import Improvement from "./Improvement.jsx";
 import { environmentForPrompt, selectInvestigationCase } from "./environment.js";
 import "./highway.css";
-const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:104.6074,traffic_kmh:104.6074,speed_variation:8.0467,spacing_m:60,exit_distance_m:600,aggressiveness:.5,traffic_phase:3};
-const HIGHWAY_FIELDS = [["speed_kmh","Target speed",40,100,1,"mph"],["traffic_kmh","Traffic speed",40,100,1,"mph"],["speed_variation","Traffic speed variation",0,20,1,"mph"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",0,1600,10,"m"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
+const HIGHWAY_DEFAULTS = {kind:"highway",speed_kmh:104.6074,traffic_kmh:104.6074,speed_variation:8.0467,spacing_m:60,exit_distance_m:643.7376,aggressiveness:.5,traffic_phase:3};
+const HIGHWAY_FIELDS = [["speed_kmh","Target speed",40,100,1,"mph"],["traffic_kmh","Traffic speed",40,100,1,"mph"],["speed_variation","Traffic speed variation",0,20,1,"mph"],["spacing_m","Traffic spacing",25,90,1,"m"],["exit_distance_m","Distance to exit",0,1,.05,"mi"],["aggressiveness","Aggressiveness",.1,1,.05,""],["traffic_phase","Traffic pattern phase",0,30,.5,"rad"]];
+const unitScale = (unit) => (unit === "mph" ? 1.609344 : unit === "mi" ? 1609.344 : 1);
+const formatUnitValue = (value, unit) =>
+  unit === "mph" ? Number((value / 1.609344).toFixed(1)) : unit === "mi" ? Number((value / 1609.344).toFixed(2)) : value;
 
 import { Comparison, Notebook, Modal, Outcome } from "./components.jsx";
 const DEFAULTS = {
@@ -198,12 +201,12 @@ export default function App() {
           setHistories(current => ({...current, [investigationScene]: [state.result, ...current[investigationScene]].slice(0, 8)}));
           if (selected === "ai") {
             const rows = state.result.rows;
-            const { chosen, policy: chosenPolicy, reason: selectionReason } = selectInvestigationCase(rows, highway);
+            const { chosen, policy: chosenPolicy, reason: selectionReason } = selectInvestigationCase(rows, highway, concern);
             setProgress("Investigation complete. Loading an AI-generated case into the replay…");
             const labels = highway ? Object.fromEntries(HIGHWAY_FIELDS.map(field=>[field[0],[field[1],field[5]]])) : { speed_kmh: ["Vehicle speed", "km/h"], van_gap: ["Van gap", "m"], emerge_s: ["Pedestrian starts at", "s"], reaction_s: ["Reaction delay", "s"], ped_speed: ["Pedestrian speed", "m/s"], brake_mps2: ["Braking strength", "m/s²"], pedestrian: ["Pedestrian present", ""] };
             const before = scene === investigationScene ? pair?.reactive.scenario || defaults : defaults;
             const changes = chosen ? Object.entries(labels).filter(([key]) => before[key] !== chosen.scenario[key]).map(([key, [label, unit]]) => {
-              const display = (value) => typeof value === "boolean" ? (value ? "yes" : "no") : `${unit === "mph" ? Number((value / 1.609344).toFixed(1)) : value} ${unit}`;
+              const display = (value) => typeof value === "boolean" ? (value ? "yes" : "no") : `${formatUnitValue(value, unit)} ${unit}`;
               return `${label}: ${display(before[key])} → ${display(chosen.scenario[key])}`;
             }) : [];
             const loaded = chosen && await simulate(chosen.scenario, true,
@@ -371,7 +374,7 @@ export default function App() {
             <div className="divider"></div>
             <h3>Manual parameters</h3>
             <p className="field-help">Adjust the controls below to replay a case without AI. These controls do not use the prompt above.</p>
-            {highway ? HIGHWAY_FIELDS.map(([key,label,min,max,step,unit])=><div className="control" key={key}><label htmlFor={key}>{label}<output>{unit === "mph" ? Number((draft[key] / 1.609344).toFixed(1)) : draft[key]} {unit}</output></label><input id={key} type="range" min={min} max={max} step={step} value={unit === "mph" ? draft[key] / 1.609344 : draft[key]} onChange={e=>edit(key,Number((Number(e.target.value) * (unit === "mph" ? 1.609344 : 1)).toFixed(4)))}/></div>) : <>
+            {highway ? HIGHWAY_FIELDS.map(([key,label,min,max,step,unit])=><div className="control" key={key}><label htmlFor={key}>{label}<output>{formatUnitValue(draft[key], unit)} {unit}</output></label><input id={key} type="range" min={min} max={max} step={step} value={draft[key] / unitScale(unit)} onChange={e=>edit(key,Number((Number(e.target.value) * unitScale(unit)).toFixed(4)))}/></div>) : <>
             <div className="control">
               <label htmlFor="speed">
                 Vehicle speed{" "}

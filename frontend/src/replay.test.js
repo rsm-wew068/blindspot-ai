@@ -66,6 +66,10 @@ test("investigation case selector prioritizes fixable failures and feasible high
   assert.equal(streetPick.chosen.index, 2);
   assert.equal(streetPick.policy, "reactive");
 
+  const cautiousPick = selectInvestigationCase(streetRows, false, "Find cases where slowing down early backfires on the cautious controller");
+  assert.equal(cautiousPick.chosen.index, 1);
+  assert.equal(cautiousPick.policy, "cautious");
+
   const highwayRows = [
     { index: 1, scenario: { exit_distance_m: 20 }, reactive: { collision: false, missed_exit: true, direction_reversals: 0, lane_changes: 0 }, cautious: { collision: false, missed_exit: true } },
     { index: 2, scenario: { exit_distance_m: 400 }, reactive: { collision: false, missed_exit: false, direction_reversals: 0, lane_changes: 1 }, cautious: { collision: false, missed_exit: false } },
