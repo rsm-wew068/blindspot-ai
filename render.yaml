@@ -5,8 +5,6 @@ services:
     plan: free
     healthCheckPath: /healthz
     envVars:
-      - key: BLINDSPOT_PASSWORD
-        generateValue: true
       - key: BLINDSPOT_ENABLE_AI
         value: "0"
       - key: NEBIUS_MODEL

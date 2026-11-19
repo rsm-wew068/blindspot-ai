@@ -13,7 +13,7 @@ from pathlib import Path
 class HostedTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.env = patch.dict(os.environ, {'BLINDSPOT_PASSWORD':'test-password-long-enough', 'BLINDSPOT_PUBLIC_ORIGIN':'https://example.test', 'BLINDSPOT_DATA_DIR':self.temp.name}, clear=True)
+        self.env = patch.dict(os.environ, {'BLINDSPOT_PUBLIC_ORIGIN':'https://example.test', 'BLINDSPOT_DATA_DIR':self.temp.name}, clear=True)
         self.env.start()
         self.frontend = Path(self.temp.name) / 'dist'
         (self.frontend / 'assets').mkdir(parents=True)
@@ -28,21 +28,23 @@ class HostedTests(unittest.TestCase):
         self.env.stop()
         self.temp.cleanup()
 
-    def call(self, path='/', method='GET', data=None, auth=True, origin=None):
+    def call(self, path='/', method='GET', data=None, auth=False, origin=None):
         raw = json.dumps(data).encode() if data is not None else b''
         env = {'PATH_INFO':path,'REQUEST_METHOD':method,'CONTENT_TYPE':'application/json','CONTENT_LENGTH':str(len(raw)),'wsgi.input':io.BytesIO(raw),'HTTP_HOST':'example.test'}
         if auth:
-            env['HTTP_AUTHORIZATION']='Basic '+base64.b64encode(b'blindspot:test-password-long-enough').decode()
+            env['HTTP_AUTHORIZATION']='Basic '+base64.b64encode(b'blindspot:legacy').decode()
         if origin:
             env['HTTP_ORIGIN']=origin
         captured=[]
         body=b''.join(hosted.application(env,lambda status,headers:captured.append((status,dict(headers)))))
         return captured[0][0],captured[0][1],body
 
-    def test_health_is_public_but_app_and_jobs_are_private(self):
-        self.assertTrue(self.call('/healthz',auth=False)[0].startswith('200'))
-        for path in ('/','/assets/street-test.js','/api/status','/api/jobs/example'):
-            self.assertTrue(self.call(path,auth=False)[0].startswith('401'))
+    def test_public_access_without_login_prompt(self):
+        for path in ('/healthz', '/', '/assets/street-test.js', '/api/status'):
+            status, headers, _ = self.call(path, auth=False)
+            self.assertTrue(status.startswith('200'), (path, status))
+            self.assertNotIn('WWW-Authenticate', headers)
+        self.assertTrue(self.call('/api/jobs/example', auth=False)[0].startswith('404'))
 
     def test_3d_assets_are_served_with_javascript_mime(self):
         for path in ('/assets/street-test.js', '/assets/three.module-test.js'):
@@ -60,9 +62,11 @@ class HostedTests(unittest.TestCase):
         for path in ('/assets/link.js', '/assets/../index.html', '/src/App.jsx', '/package.json'):
             self.assertTrue(self.call(path)[0].startswith('404'))
 
-    def test_missing_password_fails_closed(self):
-        os.environ.pop('BLINDSPOT_PASSWORD')
-        self.assertTrue(self.call()[0].startswith('503'))
+    def test_legacy_password_env_is_ignored_without_login_prompt(self):
+        os.environ['BLINDSPOT_PASSWORD'] = 'legacy-password-still-in-render-env'
+        status, headers, _ = self.call('/', auth=False)
+        self.assertTrue(status.startswith('200'))
+        self.assertNotIn('WWW-Authenticate', headers)
 
     def test_foreign_origin_rejected(self):
         self.assertTrue(self.call('/api/simulate','POST',{},origin='https://evil.example')[0].startswith('403'))

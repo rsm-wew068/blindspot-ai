@@ -1,12 +1,9 @@
 """Single-process WSGI deployment; existing local server stays unchanged."""
 from frontend_assets import frontend_asset
-import base64
-import hmac
 import json
 import os
 import threading
 import uuid
-from urllib.parse import urlparse
 
 from simulation import Scenario, VERSION, compare
 from highway import HighwayScenario, compare as compare_highway
@@ -16,20 +13,6 @@ from server import JOBS, LOCK, work
 
 HEADERS = [("Cache-Control", "no-store"), ("X-Content-Type-Options", "nosniff"),
            ("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'")]
-
-
-def authenticated(environ):
-    password = os.environ.get("BLINDSPOT_PASSWORD", "")
-    if not password:
-        return False
-    try:
-        scheme, token = environ.get("HTTP_AUTHORIZATION", "").split(" ", 1)
-        if scheme.lower() != "basic":
-            return False
-        user, supplied = base64.b64decode(token, validate=True).decode().split(":", 1)
-        return hmac.compare_digest(user, "blindspot") and hmac.compare_digest(supplied.encode(), password.encode())
-    except (ValueError, UnicodeError):
-        return False
 
 
 def origin_allowed(environ):
@@ -60,10 +43,6 @@ def application(environ, start_response):
     path, method = environ.get("PATH_INFO", "/"), environ.get("REQUEST_METHOD", "GET")
     if path == "/healthz" and method == "GET":
         return send(200, {"status":"ok"})
-    if not os.environ.get("BLINDSPOT_PASSWORD"):
-        return send(503, {"error":"Set BLINDSPOT_PASSWORD before opening this deployment."})
-    if not authenticated(environ):
-        return send(401, {"error":"Sign in with username blindspot and the demo password."}, extra=[("WWW-Authenticate", 'Basic realm="BlindSpot", charset="UTF-8"')])
     if method == "GET":
         if path == "/api/status":
             state = connection()
@@ -146,7 +125,5 @@ def application(environ, start_response):
 
 if __name__ == "__main__":
     from waitress import serve
-    if len(os.environ.get("BLINDSPOT_PASSWORD", "")) < 16:
-        raise SystemExit("Set BLINDSPOT_PASSWORD to at least 16 characters.")
     serve(application, host="0.0.0.0", port=int(os.environ.get("PORT", "8080")),
           threads=4, max_request_body_size=750000, channel_timeout=30)

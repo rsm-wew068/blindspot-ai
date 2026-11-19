@@ -5,8 +5,8 @@ The multi-stage Docker build compiles React/Vite with Node 22, then copies only 
 ## Required setup
 
 - Deploy this Dockerfile on a container host such as Render, Railway or a Nebius VM.
-- Set `BLINDSPOT_PASSWORD` to a randomly generated password of at least 16 characters. All app pages and APIs require username `blindspot` and this password; only `/healthz` is public.
-- Use the host's HTTPS endpoint. Set `BLINDSPOT_PUBLIC_ORIGIN` to that exact HTTPS origin. Render's `RENDER_EXTERNAL_URL` and Railway's `RAILWAY_PUBLIC_DOMAIN` are recognized automatically.
+- The hosted app opens publicly without a login prompt (`BLINDSPOT_PASSWORD` is ignored if present).
+- Use the host's HTTPS endpoint. Set `BLINDSPOT_PUBLIC_ORIGIN` to that exact HTTPS origin when not on Render or Railway (Render's `RENDER_EXTERNAL_URL` and Railway's `RAILWAY_PUBLIC_DOMAIN` are recognized automatically).
 - Expose the injected `PORT` (default 8080).
 - Start with `BLINDSPOT_ENABLE_AI=0`. The simulator and non-AI searches need no secrets or AI charges.
 
@@ -18,17 +18,17 @@ Hosted AI has no daily run cap. The legacy `BLINDSPOT_AI_DAILY_RUNS` setting is 
 
 Exports download to the visitor's browser rather than being left on the server. The existing local development server still saves local exports as before.
 
-The demo password is shared access, not individual accounts. Everyone with the password can access active job results. Do not submit personal data or secrets in scenario text. Keep the shared demo limited to trusted reviewers.
+Everyone visiting the public deployment shares the single active-job slot; do not submit personal data or secrets in scenario text.
 
 ## Local production-server test
 
-Run `npm ci --prefix frontend` and `npm run build --prefix frontend`, install requirements in a virtual environment, set `BLINDSPOT_PASSWORD` and run `python hosted.py`. Do not use the HTTP localhost endpoint for a remote deployment; terminate HTTPS at the hosting provider.
+Run `npm ci --prefix frontend` and `npm run build --prefix frontend`, install requirements in a virtual environment, and run `python hosted.py`. Do not use the HTTP localhost endpoint for a remote deployment; terminate HTTPS at the hosting provider.
 
 ## Render preview
 
-Open https://render.com/deploy?repo=https://github.com/rsm-wew068/blindspot-ai and create the Blueprint in your own Render workspace. The checked-in `render.yaml` explicitly selects the free plan and leaves AI disabled. Render generates `BLINDSPOT_PASSWORD`; find its value in the service's Environment settings and sign in with username `blindspot`.
+Open https://render.com/deploy?repo=https://github.com/rsm-wew068/blindspot-ai and create the Blueprint in your own Render workspace. The checked-in `render.yaml` explicitly selects the free plan and leaves AI disabled by default.
 
-Wait for the service to become Live, then open its onrender.com URL. `/healthz` is public; the app requires the generated password. The standard Render URL is recognized automatically for API requests.
+Wait for the service to become Live, then open its onrender.com URL directly—no username or password is required. The standard Render URL is recognized automatically for API requests.
 
 Free instances sleep after inactivity and do not persist local storage. Before enabling AI, arrange persistent storage for the run counter (a paid disk or an external database requires separate setup). Do not treat the free instance's SQLite counter as a durable allowance. Add the Nebius key only through the service's secret environment settings, never to this repository.
 
